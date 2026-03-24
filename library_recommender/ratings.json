@@ -1,0 +1,70 @@
+{
+  "checkouts": [
+    {
+      "id": 12,
+      "book_id": 2121,
+      "checkout_date": "2026-03-24",
+      "return_date": "2026-03-24",
+      "rating": 5.0,
+      "notes": null,
+      "title": "It's A Field Trip, Busy Bus!",
+      "author": "Shaffer, Jody Jensen"
+    },
+    {
+      "id": 13,
+      "book_id": 133038,
+      "checkout_date": "2026-03-24",
+      "return_date": "2026-03-24",
+      "rating": 5.0,
+      "notes": null,
+      "title": "Fire Race",
+      "author": "London, Jonathan"
+    },
+    {
+      "id": 14,
+      "book_id": 171431,
+      "checkout_date": "2026-03-24",
+      "return_date": "2026-03-24",
+      "rating": 4.0,
+      "notes": null,
+      "title": "The First Day of Peace",
+      "author": "Shuster, Todd"
+    },
+    {
+      "id": 15,
+      "book_id": 16078,
+      "checkout_date": "2026-03-24",
+      "return_date": "2026-03-24",
+      "rating": 1.0,
+      "notes": null,
+      "title": "The King of Easter",
+      "author": "Hains, Todd R."
+    }
+  ],
+  "book_ratings": [
+    {
+      "title": "It's A Field Trip, Busy Bus!",
+      "author": "Shaffer, Jody Jensen",
+      "avg_rating": 5.0,
+      "times_checked_out": 1
+    },
+    {
+      "title": "The King of Easter",
+      "author": "Hains, Todd R.",
+      "avg_rating": 1.0,
+      "times_checked_out": 1
+    },
+    {
+      "title": "Fire Race",
+      "author": "London, Jonathan",
+      "avg_rating": 5.0,
+      "times_checked_out": 1
+    },
+    {
+      "title": "The First Day of Peace",
+      "author": "Shuster, Todd",
+      "avg_rating": 4.0,
+      "times_checked_out": 1
+    }
+  ]
+}

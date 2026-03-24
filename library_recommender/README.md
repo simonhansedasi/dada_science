@@ -24,7 +24,8 @@ library_recommender/
 ├── explore_catalog.py   Catalog explorer — shows available filter fields and counts
 ├── Untitled.ipynb       Scraper notebook — exploration / raw API inspection
 ├── library              Shell wrapper so you can run ./library <command>
-├── library.db           SQLite database (created on first run)
+├── library.db           SQLite database (created on first run, not committed — too large)
+├── ratings.json         Exported ratings (commit this to persist across machines)
 ├── requirements.txt     Python dependencies
 ├── INSTRUCTIONS.md      Quick reference for daily use
 └── README.md            This file
@@ -216,6 +217,27 @@ Rate a book directly without going through the checkout flow. Useful for seeding
 ./library rate-book              # interactive: search → pick → rate, repeat
 ./library rate-book <id> <score> # one-liner
 ```
+
+---
+
+### `./library export-ratings` / `./library import-ratings`
+
+Export your personal ratings and checkout history to a small JSON file, and restore them on a new machine.
+
+```bash
+./library export-ratings         # writes ratings.json — commit this to git
+./library export-ratings myfile.json
+
+./library import-ratings         # restores from ratings.json
+./library import-ratings myfile.json
+```
+
+Books are matched by title + author, so import works correctly after a full re-scrape where numeric IDs differ. Books not found in the current catalog are reported as skipped — re-scrape more of the catalog and import again.
+
+**New machine workflow:**
+1. `git pull`
+2. `python catalog_scraper.py`
+3. `./library import-ratings`
 
 ---
 

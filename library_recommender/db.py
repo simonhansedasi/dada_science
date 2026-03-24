@@ -165,6 +165,73 @@ def rate_book_direct(book_id: int, rating: float):
     conn.close()
 
 
+def export_ratings():
+    """Return all rating data as a serialisable dict.
+
+    Exports:
+    - checkouts table (every row)
+    - per-book personal fields (avg_rating, times_checked_out) keyed by (title, author)
+      so they survive a catalog re-scrape where numeric IDs may change.
+    """
+    conn = get_conn()
+    checkouts = [dict(r) for r in conn.execute(
+        "SELECT c.*, b.title, b.author FROM checkouts c JOIN books b ON b.id = c.book_id"
+    ).fetchall()]
+    book_ratings = [dict(r) for r in conn.execute(
+        "SELECT title, author, avg_rating, times_checked_out "
+        "FROM books WHERE avg_rating IS NOT NULL OR times_checked_out > 0"
+    ).fetchall()]
+    conn.close()
+    return {"checkouts": checkouts, "book_ratings": book_ratings}
+
+
+def import_ratings(data: dict):
+    """Restore ratings exported by export_ratings().
+
+    Matches books by (title, author). Skips any book not found in the current
+    catalog. Returns (restored, skipped) counts.
+    """
+    conn = get_conn()
+    restored = skipped = 0
+
+    for br in data.get("book_ratings", []):
+        row = conn.execute(
+            "SELECT id FROM books WHERE title = ? AND author = ?",
+            (br["title"], br["author"])
+        ).fetchone()
+        if not row:
+            skipped += 1
+            continue
+        conn.execute(
+            "UPDATE books SET avg_rating = ?, times_checked_out = ? WHERE id = ?",
+            (br["avg_rating"], br["times_checked_out"], row["id"])
+        )
+        restored += 1
+
+    for c in data.get("checkouts", []):
+        row = conn.execute(
+            "SELECT id FROM books WHERE title = ? AND author = ?",
+            (c["title"], c["author"])
+        ).fetchone()
+        if not row:
+            continue
+        book_id = row["id"]
+        exists = conn.execute(
+            "SELECT id FROM checkouts WHERE book_id = ? AND checkout_date = ? AND rating IS ?",
+            (book_id, c["checkout_date"], c["rating"])
+        ).fetchone()
+        if not exists:
+            conn.execute(
+                "INSERT INTO checkouts (book_id, checkout_date, return_date, rating, notes) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (book_id, c["checkout_date"], c["return_date"], c["rating"], c.get("notes"))
+            )
+
+    conn.commit()
+    conn.close()
+    return restored, skipped
+
+
 def search_books(query: str):
     conn = get_conn()
     like = f"%{query}%"

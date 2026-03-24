@@ -120,6 +120,14 @@ Prompts you to rate each checked-out book 1–5 based on engagement. Press `s` t
 ./library rate-book <id> <score> # one-liner
 ```
 
+### Save and restore ratings
+```bash
+./library export-ratings         # writes ratings.json (commit this to git)
+./library import-ratings         # restores from ratings.json after a re-scrape
+```
+
+`ratings.json` is small and safe to commit. On a new machine: scrape the catalog, then import. Books are matched by title + author so numeric IDs don't matter.
+
 ### Search the catalog
 ```bash
 ./library search "caterpillar"
@@ -140,7 +148,8 @@ Prompts you to rate each checked-out book 1–5 based on engagement. Press `s` t
 
 | File | Purpose |
 |------|---------|
-| `library.db` | SQLite database — all books, checkouts, and ratings |
+| `library.db` | SQLite database — all books, checkouts, and ratings (not committed — too large) |
+| `ratings.json` | Exported ratings — commit this to git to persist across machines |
 | `.env` | Credentials — card, PIN, default branch (never committed) |
 | `catalog_scraper.py` | Populates and refreshes the catalog |
 | `failed_pages.csv` | Pages that errored during last scrape (created if any failures) |

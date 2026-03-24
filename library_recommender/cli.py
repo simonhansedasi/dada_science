@@ -4,6 +4,7 @@ Library Recommender CLI
 A recommendation system for toddler library books.
 """
 
+import json
 import sys
 import click
 from rich.console import Console
@@ -537,6 +538,56 @@ def my_account(card, pin):
             renew = "[green]Yes[/green]" if c["renewable"] else "[dim]No[/dim]"
             t2.add_row(f"[{color}]{c['title']}[/{color}]", c["author"] or "—", due, renew)
         console.print(t2)
+
+
+@cli.command(name="export-ratings")
+@click.argument("path", default="ratings.json", required=False)
+def export_ratings(path):
+    """Export your ratings and checkout history to a JSON file.
+
+    \b
+    Usage:
+      ./library export-ratings             # writes ratings.json
+      ./library export-ratings myfile.json # custom path
+    """
+    data = db.export_ratings()
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
+    n_checkouts   = len(data["checkouts"])
+    n_book_ratings = len(data["book_ratings"])
+    console.print(
+        f"[green]Exported[/green] {n_book_ratings} rated book(s) "
+        f"and {n_checkouts} checkout record(s) to [bold]{path}[/bold]"
+    )
+
+
+@cli.command(name="import-ratings")
+@click.argument("path", default="ratings.json", required=False)
+def import_ratings(path):
+    """Restore ratings from a JSON file produced by export-ratings.
+
+    \b
+    Usage:
+      ./library import-ratings             # reads ratings.json
+      ./library import-ratings myfile.json # custom path
+
+    Books are matched by title + author, so this works after a full
+    re-scrape even if numeric IDs have changed.
+    """
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        console.print(f"[red]File not found: {path}[/red]")
+        sys.exit(1)
+
+    restored, skipped = db.import_ratings(data)
+    console.print(f"[green]Restored[/green] {restored} book(s).")
+    if skipped:
+        console.print(
+            f"[dim]{skipped} book(s) skipped — not found in current catalog. "
+            f"Re-run the scraper then import again.[/dim]"
+        )
 
 
 if __name__ == "__main__":
