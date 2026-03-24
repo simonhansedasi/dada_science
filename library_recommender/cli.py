@@ -11,9 +11,10 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.text import Text
 from rich import box
+from rich.status import Status
 
 import db
-import importer as imp
+import hold as holds_mod
 import recommender as rec
 
 console = Console()
@@ -40,7 +41,12 @@ def _book_panel(book: dict, score: float = None, label: str = "") -> Panel:
     if score is not None:
         lines.append(f"\n[dim]Match score: {score:.2f}[/dim]")
 
-    title_text = f"[bold cyan]{book['title']}[/bold cyan]  [dim]#{book['id']}[/dim]"
+    bid = book['id']
+    lines.append(
+        f"\n[dim]availability {bid}  •  hold {bid}  •  checkout {bid}[/dim]"
+    )
+
+    title_text = f"[bold cyan]{book['title']}[/bold cyan]  [bold yellow]id:{book['id']}[/bold yellow]"
     if label:
         title_text = f"{label}  {title_text}"
 
@@ -58,19 +64,19 @@ def cli():
     db.init_db()
 
 
-@cli.command()
-@click.argument("csv_path", type=click.Path(exists=True))
-@click.option("--dry-run", is_flag=True, help="Preview column mapping without importing.")
-def import_csv(csv_path, dry_run):
-    """Import library inventory from a CSV file."""
-    console.print(f"\n[bold]Importing:[/bold] {csv_path}\n")
-    imp.import_csv(csv_path, dry_run=dry_run)
-
 
 @cli.command()
-def recommend():
+@click.option("--age", default=None, metavar="AUDIENCE",
+              help="Filter by audience, e.g. juvenile, adult, teen.")
+def recommend(age):
     """Get 10 book recommendations (5 top, 2 experimental, 3 hidden gems)."""
-    result, err = rec.recommend()
+    with Status("", console=console, spinner="dots") as status:
+        def step(msg):
+            console.print(f"  [dim]✓[/dim] {msg}")
+            status.update(f"[dim]{msg}[/dim]")
+
+        result, err = rec.recommend(age=age, step_fn=step)
+
     if err:
         console.print(f"[red]{err}[/red]")
         sys.exit(1)
@@ -112,9 +118,108 @@ def recommend():
         console.print(_book_panel(book, label=f"[yellow]{i}.[/yellow]"))
 
     console.print(
-        "\n[dim]To check out a book: [bold]library checkout <id>[/bold][/dim]"
-        "\n[dim]To rate books:        [bold]library rate[/bold][/dim]\n"
+        "\n[dim]availability [bold]<id>[/bold]   check which branches have it and if it's on the shelf[/dim]"
+        "\n[dim]hold [bold]<id>[/bold]           place a hold for library pickup (uses .env credentials)[/dim]"
+        "\n[dim]checkout [bold]<id>[/bold]       record a local checkout so you can rate it later[/dim]"
+        "\n[dim]rate                rate returned books to improve future recommendations[/dim]\n"
     )
+
+
+@cli.command(name="rate-book")
+@click.argument("book_id", type=int, required=False)
+@click.argument("score",   type=float, required=False)
+def rate_book(book_id, score):
+    """Directly rate a book — no checkout step needed. Great for seeding.
+
+    \b
+    Usage:
+      ./library rate-book              # interactive: search → rate in a loop
+      ./library rate-book <id> <score> # one-liner: rate book #id with score
+    """
+    # ── One-liner mode ───────────────────────────────────────────────────────
+    if book_id is not None:
+        book = db.get_book(book_id)
+        if not book:
+            console.print(f"[red]Book #{book_id} not found.[/red]")
+            sys.exit(1)
+        if score is None:
+            score = click.prompt(
+                f"  Rating for '{book['title']}' (1–5)",
+                type=click.FloatRange(1, 5)
+            )
+        if not (1.0 <= score <= 5.0):
+            console.print("[red]Score must be between 1 and 5.[/red]")
+            sys.exit(1)
+        db.rate_book_direct(book_id, score)
+        stars = "★" * int(score) + "☆" * (5 - int(score))
+        console.print(f"[yellow]{stars}[/yellow] [bold]{book['title']}[/bold] rated {score}\n")
+        return
+
+    # ── Interactive loop mode ─────────────────────────────────────────────────
+    console.print(
+        "\n[bold]Seed ratings[/bold]  [dim](search for a book, rate it, repeat)[/dim]\n"
+        "[dim]Leave search blank to finish.[/dim]\n"
+    )
+    rated = 0
+    while True:
+        query = click.prompt("Search", default="", show_default=False).strip()
+        if not query:
+            break
+
+        results = db.search_books(query)
+        if not results:
+            console.print(f"  [dim]No results for '{query}'[/dim]\n")
+            continue
+
+        # Show matches as a compact numbered list
+        matches = results[:8]
+        console.print()
+        for i, b in enumerate(matches, 1):
+            existing = f"  [dim](already rated {b['avg_rating']:.1f})[/dim]" if b.get("avg_rating") else ""
+            console.print(f"  [cyan]{i}.[/cyan] [bold]{b['title']}[/bold]"
+                          + (f"  [dim]— {b['author']}[/dim]" if b.get("author") else "")
+                          + existing)
+        console.print()
+
+        if len(matches) == 1:
+            book = matches[0]
+        else:
+            pick = click.prompt(
+                "  Pick a number (or Enter to skip)",
+                default="", show_default=False
+            ).strip()
+            if not pick:
+                continue
+            try:
+                idx = int(pick) - 1
+                if not (0 <= idx < len(matches)):
+                    raise ValueError
+            except ValueError:
+                console.print("  [red]Invalid choice.[/red]\n")
+                continue
+            book = matches[idx]
+        raw = click.prompt(
+            f"  Rating for '{book['title']}' (1–5, or s to skip)",
+            default="s", show_default=False
+        ).strip()
+        if raw.lower() == "s":
+            continue
+        try:
+            score = float(raw)
+            if not (1.0 <= score <= 5.0):
+                raise ValueError
+        except ValueError:
+            console.print("  [red]Enter a number 1–5.[/red]\n")
+            continue
+
+        db.rate_book_direct(book["id"], score)
+        stars = "★" * int(score) + "☆" * (5 - int(score))
+        console.print(f"  [yellow]{stars}[/yellow] saved!\n")
+        rated += 1
+
+    if rated:
+        console.print(f"[green]{rated} book(s) rated.[/green] "
+                      f"Run [bold]./library recommend[/bold] to see your picks.\n")
 
 
 @cli.command()
@@ -226,6 +331,212 @@ def list_books(rated, limit):
     console.print(table)
     if len(books) > limit:
         console.print(f"[dim]Showing {limit} of {len(books)} books. Use --limit to see more.[/dim]")
+
+
+@cli.command()
+@click.argument("book_id", type=int)
+def availability(book_id):
+    """Show which branches have a book and whether it's on the shelf."""
+    book = db.get_book(book_id)
+    if not book:
+        console.print(f"[red]Book #{book_id} not found.[/red]")
+        sys.exit(1)
+
+    if not book.get("metadata_id"):
+        console.print(
+            f"[red]No BiblioCommons ID for '{book['title']}'.[/red]\n"
+            "[dim]Re-run the scraper: python catalog_scraper.py[/dim]"
+        )
+        sys.exit(1)
+
+    with console.status("[dim]Checking availability...[/dim]"):
+        try:
+            copies = holds_mod.get_availability(book["metadata_id"])
+        except Exception as e:
+            console.print(f"[red]Could not fetch availability: {e}[/red]")
+            sys.exit(1)
+
+    console.print(f"\n[bold cyan]{book['title']}[/bold cyan]"
+                  + (f"  [dim]by {book['author']}[/dim]" if book.get("author") else ""))
+
+    if not copies:
+        console.print("[dim]No copies found.[/dim]\n")
+        return
+
+    t = Table(box=box.SIMPLE, show_header=True)
+    t.add_column("Branch", style="cyan")
+    t.add_column("Collection")
+    t.add_column("Status", justify="center")
+    t.add_column("Call number", style="dim")
+
+    for c in copies:
+        status = c["library_status"] or c["status"]
+        status_str = f"[green]{status}[/green]" if c["status"] == "AVAILABLE" else f"[dim]{status}[/dim]"
+        t.add_row(c["branch_name"], c["collection"], status_str, c["call_number"])
+
+    console.print(t)
+    console.print(f"[dim]To place a hold: [bold]./library hold {book_id}[/bold][/dim]\n")
+
+
+@cli.command()
+@click.argument("book_id", type=int)
+@click.option("--branch", default=None, envvar="SNOISLE_BRANCH", help="Pickup branch ID. Falls back to SNOISLE_BRANCH in .env, then interactive.")
+@click.option("--card", default=None, envvar="SNOISLE_CARD", help="Library card number.")
+@click.option("--pin",  default=None, envvar="SNOISLE_PIN",  help="Library PIN.")
+def hold(book_id, branch, card, pin):
+    """Place a hold on a book at Sno-Isle for library pickup."""
+    book = db.get_book(book_id)
+    if not book:
+        console.print(f"[red]Book #{book_id} not found.[/red]")
+        sys.exit(1)
+
+    if not book.get("metadata_id"):
+        console.print(
+            f"[red]No BiblioCommons ID for '{book['title']}'.[/red]\n"
+            "[dim]Re-run the scraper to populate metadata IDs: "
+            "python catalog_scraper.py[/dim]"
+        )
+        sys.exit(1)
+
+    # Live availability lookup
+    with console.status("[dim]Checking availability...[/dim]"):
+        try:
+            copies = holds_mod.get_availability(book["metadata_id"])
+        except Exception as e:
+            console.print(f"[yellow]Could not fetch availability: {e}[/yellow]")
+            copies = []
+
+    if copies:
+        avail_table = Table(title="Copy availability", box=box.SIMPLE, show_header=True)
+        avail_table.add_column("Branch", style="cyan")
+        avail_table.add_column("Collection")
+        avail_table.add_column("Status", justify="center")
+        avail_table.add_column("Call number", style="dim")
+
+        for c in copies:
+            status = c["library_status"] or c["status"]
+            if c["status"] == "AVAILABLE":
+                status_str = f"[green]{status}[/green]"
+            else:
+                status_str = f"[dim]{status}[/dim]"
+            avail_table.add_row(c["branch_name"], c["collection"], status_str, c["call_number"])
+
+        console.print()
+        console.print(avail_table)
+
+    # Branch selection
+    if branch:
+        console.print(f"\n[dim]Pickup branch: {branch}[/dim]")
+    else:
+        console.print("\n[bold]Select a pickup branch:[/bold]\n")
+        try:
+            branches = holds_mod.get_branches()
+        except Exception as e:
+            console.print(f"[red]Could not fetch branches: {e}[/red]")
+            sys.exit(1)
+
+        for code, name in branches:
+            console.print(f"  [cyan]{code:3s}[/cyan]  {name}")
+
+        branch = click.prompt("\nBranch ID")
+
+    # Credentials — envvar / .env fallback handled inside hold_book()
+    console.print(f"\nPlacing hold on [bold cyan]{book['title']}[/bold cyan]...")
+
+    try:
+        holds_mod.hold_book(
+            metadata_id=book["metadata_id"],
+            pickup_branch_id=branch,
+            card=card,
+            pin=pin,
+        )
+        console.print(
+            f"[green]Hold placed![/green] Pick up at branch [bold]{branch}[/bold] "
+            f"when it's ready.\n"
+            f"[dim]Check your holds at https://sno-isle.bibliocommons.com/holds[/dim]\n"
+        )
+    except RuntimeError as e:
+        console.print(f"[red]{e}[/red]")
+        sys.exit(1)
+
+
+@cli.command(name="my-account")
+@click.option("--card", default=None, envvar="SNOISLE_CARD")
+@click.option("--pin",  default=None, envvar="SNOISLE_PIN")
+def my_account(card, pin):
+    """Show your current holds and checked-out books from Sno-Isle."""
+    if not card or not pin:
+        env_card, env_pin = holds_mod._load_credentials()
+        card = card or env_card
+        pin  = pin  or env_pin
+    if not card or not pin:
+        console.print("[red]No credentials. Set SNOISLE_CARD and SNOISLE_PIN in .env[/red]")
+        sys.exit(1)
+
+    with console.status("[dim]Logging in...[/dim]"):
+        try:
+            session = holds_mod.login(card, pin)
+            account_id, _ = holds_mod.get_account_id(session)
+        except Exception as e:
+            console.print(f"[red]Login failed: {e}[/red]")
+            sys.exit(1)
+
+    with console.status("[dim]Fetching your account...[/dim]"):
+        try:
+            holds     = holds_mod.get_holds(session, account_id)
+            checkouts = holds_mod.get_checkouts(session, account_id)
+        except Exception as e:
+            console.print(f"[red]Could not fetch account data: {e}[/red]")
+            sys.exit(1)
+
+    # ── Holds ──────────────────────────────────────────────────────────────
+    console.print()
+    console.print(Panel(
+        f"[bold cyan]HOLDS[/bold cyan]  [dim]({len(holds)} waiting)[/dim]",
+        border_style="cyan", box=box.ROUNDED, padding=(0, 1)
+    ))
+    if not holds:
+        console.print("  [dim]No holds.[/dim]\n")
+    else:
+        t = Table(box=box.SIMPLE, show_header=True)
+        t.add_column("Title", style="cyan", max_width=40)
+        t.add_column("Author", max_width=22)
+        t.add_column("Status", justify="center")
+        t.add_column("Position", justify="right")
+        t.add_column("Pickup branch")
+        t.add_column("Pickup by", style="dim")
+        for h_ in holds:
+            status = h_["status"] or "—"
+            color  = "green" if status == "READY" else "yellow"
+            t.add_row(
+                h_["title"],
+                h_["author"] or "—",
+                f"[{color}]{status}[/{color}]",
+                str(h_["position"]) if h_["position"] else "—",
+                h_["pickup_branch"] or "—",
+                h_["pickup_by"] or "—",
+            )
+        console.print(t)
+
+    # ── Checkouts ──────────────────────────────────────────────────────────
+    console.print(Panel(
+        f"[bold green]CHECKED OUT[/bold green]  [dim]({len(checkouts)} books)[/dim]",
+        border_style="green", box=box.ROUNDED, padding=(0, 1)
+    ))
+    if not checkouts:
+        console.print("  [dim]No books currently checked out.[/dim]\n")
+    else:
+        t2 = Table(box=box.SIMPLE, show_header=True)
+        t2.add_column("Title", style="cyan", max_width=40)
+        t2.add_column("Author", max_width=22)
+        t2.add_column("Due date", justify="center")
+        t2.add_column("Renewable", justify="center")
+        for c in checkouts:
+            due   = c["due_date"][:10] if c["due_date"] else "—"
+            color = "red" if c["overdue"] else "white"
+            renew = "[green]Yes[/green]" if c["renewable"] else "[dim]No[/dim]"
+            t2.add_row(f"[{color}]{c['title']}[/{color}]", c["author"] or "—", due, renew)
+        console.print(t2)
 
 
 if __name__ == "__main__":

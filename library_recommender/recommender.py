@@ -31,10 +31,22 @@ def _build_text(book: dict) -> str:
     return " ".join(p for p in parts if p).lower()
 
 
-def recommend():
+def recommend(age: str = None, step_fn=None):
+    def step(msg):
+        if step_fn:
+            step_fn(msg)
+
+    step("Loading catalog...")
     books = get_all_books()
     if not books:
         return None, "No books in database. Run `import` first."
+
+    # Age filter — case-insensitive substring match against age_range field
+    if age:
+        age_lower = age.lower()
+        books = [b for b in books if age_lower in (b.get("age_range") or "").lower()]
+        if not books:
+            return None, f"No books found for age filter '{age}'."
 
     # Split into already-checked-out and candidates
     checked_ids = {b["id"] for b in books if b["times_checked_out"] > 0}
@@ -43,7 +55,7 @@ def recommend():
     if not candidates:
         return None, "No un-read books to recommend. Import a larger catalog."
 
-    # Build TF-IDF corpus over ALL books for consistent vocabulary
+    step(f"Building vocabulary across {len(books):,} books...")
     all_texts = [_build_text(b) for b in books]
     id_to_idx = {b["id"]: i for i, b in enumerate(books)}
 
@@ -61,23 +73,25 @@ def recommend():
     # Build preference profile: mean vector of books rated >= 4
     liked = [b for b in books if b.get("avg_rating") and b["avg_rating"] >= 4.0]
     if liked:
+        step(f"Building taste profile from {len(liked)} loved book(s)...")
         liked_indices = [id_to_idx[b["id"]] for b in liked]
         profile = np.asarray(tfidf_matrix[liked_indices].mean(axis=0))
     else:
         # Fall back to all checked-out books if no ratings yet
         checked_list = [b for b in books if b["id"] in checked_ids]
         if checked_list:
+            step(f"No ratings yet — profiling from {len(checked_list)} checked-out book(s)...")
             indices = [id_to_idx[b["id"]] for b in checked_list]
             profile = np.asarray(tfidf_matrix[indices].mean(axis=0))
         else:
+            step("No history yet — ranking by library popularity...")
             profile = None
 
-    # Popularity normalization
+    step(f"Scoring {len(candidates):,} candidates...")
     checkout_counts = np.array([b.get("library_checkout_count") or 0 for b in candidates], dtype=float)
     max_count = checkout_counts.max() if checkout_counts.max() > 0 else 1
     pop_scores = checkout_counts / max_count
 
-    # Content similarity for candidates
     cand_indices = [id_to_idx[b["id"]] for b in candidates]
     cand_matrix = tfidf_matrix[cand_indices]
 
@@ -86,7 +100,7 @@ def recommend():
     else:
         content_scores = np.zeros(len(candidates))
 
-    # Combined score
+    step("Ranking results...")
     final_scores = 0.6 * content_scores + 0.4 * pop_scores
 
     scored = list(zip(candidates, final_scores, content_scores, pop_scores))
@@ -97,7 +111,6 @@ def recommend():
 
     # --- 2 Experimental: high content similarity but low popularity ---
     exp_pool = sorted(scored, key=lambda x: x[2] - x[3], reverse=True)
-    # exclude already picked
     top_ids = {b["id"] for b, *_ in top}
     experimental = [s for s in exp_pool if s[0]["id"] not in top_ids][:2]
 

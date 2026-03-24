@@ -23,6 +23,7 @@ def init_db():
             genre TEXT,
             subject TEXT,
             -- library data
+            metadata_id TEXT,
             library_checkout_count INTEGER DEFAULT 0,
             last_library_checkout TEXT,
             -- user data
@@ -43,6 +44,17 @@ def init_db():
         );
     """)
     conn.commit()
+
+    # Migrations — safe to re-run, silently skipped if column already exists
+    for migration in [
+        "ALTER TABLE books ADD COLUMN metadata_id TEXT",
+    ]:
+        try:
+            conn.execute(migration)
+            conn.commit()
+        except Exception:
+            pass  # column already exists
+
     conn.close()
 
 
@@ -126,6 +138,29 @@ def record_rating(checkout_id: int, rating: float):
         )
         WHERE id = (SELECT book_id FROM checkouts WHERE id = ?)
     """, (checkout_id,))
+    conn.commit()
+    conn.close()
+
+
+def rate_book_direct(book_id: int, rating: float):
+    """Create a completed checkout record with a rating in one step.
+    Used for seeding ratings without going through the checkout flow."""
+    conn = get_conn()
+    conn.execute(
+        """INSERT INTO checkouts (book_id, checkout_date, return_date, rating)
+           VALUES (?, date('now'), date('now'), ?)""",
+        (book_id, rating)
+    )
+    conn.execute(
+        "UPDATE books SET times_checked_out = times_checked_out + 1 WHERE id = ?",
+        (book_id,)
+    )
+    conn.execute("""
+        UPDATE books SET avg_rating = (
+            SELECT AVG(rating) FROM checkouts
+            WHERE book_id = ? AND rating IS NOT NULL
+        ) WHERE id = ?
+    """, (book_id, book_id))
     conn.commit()
     conn.close()
 
