@@ -31,7 +31,7 @@ QUERIES   = list("abcdefghijklmnopqrstuvwxyz0123456789")
 # Fields we compare to decide whether a row needs updating
 COMPARE_FIELDS = (
     "description", "isbn", "genre", "subject",
-    "age_range", "library_checkout_count",
+    "age_range", "library_checkout_count", "metadata_id",
 )
 
 _seen: set       = set()
@@ -107,7 +107,7 @@ def _extract(data):
             "subject":                "; ".join(dict.fromkeys(subjects)),
             "age_range":              "; ".join(info.get("audiences") or []),
             "library_checkout_count": checkout_count,
-            "metadata_id":            s(info.get("metadataId")),
+            "metadata_id":            bib_id,
         })
     return books
 
@@ -203,6 +203,10 @@ def _fetch_page(query, page):
             data  = _fetch(sess, query, page)
             books = _extract(data)
             return query, page, books, None
+        except requests.exceptions.Timeout as e:
+            wait = 2 ** attempt
+            tqdm.write(f"  [{query} p{page}] Timeout — retrying in {wait}s")
+            time.sleep(wait)
         except requests.HTTPError as e:
             status = e.response.status_code if e.response is not None else "?"
             if status in (429, 503) or (isinstance(status, int) and status >= 500):

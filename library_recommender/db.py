@@ -26,7 +26,7 @@ def init_db():
             metadata_id TEXT,
             library_checkout_count INTEGER DEFAULT 0,
             last_library_checkout TEXT,
-            -- user data
+            -- legacy columns (superseded by user_ratings table)
             times_checked_out INTEGER DEFAULT 0,
             avg_rating REAL,
             date_added TEXT DEFAULT (date('now')),
@@ -36,18 +36,29 @@ def init_db():
         CREATE TABLE IF NOT EXISTS checkouts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             book_id INTEGER NOT NULL,
+            user TEXT NOT NULL DEFAULT 'default',
             checkout_date TEXT DEFAULT (date('now')),
             return_date TEXT,
             rating REAL,
             notes TEXT,
             FOREIGN KEY (book_id) REFERENCES books(id)
         );
+
+        CREATE TABLE IF NOT EXISTS user_ratings (
+            user TEXT NOT NULL,
+            book_id INTEGER NOT NULL,
+            avg_rating REAL,
+            times_checked_out INTEGER DEFAULT 0,
+            PRIMARY KEY (user, book_id),
+            FOREIGN KEY (book_id) REFERENCES books(id)
+        );
     """)
     conn.commit()
 
-    # Migrations — safe to re-run, silently skipped if column already exists
+    # Migrations — safe to re-run
     for migration in [
         "ALTER TABLE books ADD COLUMN metadata_id TEXT",
+        "ALTER TABLE checkouts ADD COLUMN user TEXT NOT NULL DEFAULT 'default'",
     ]:
         try:
             conn.execute(migration)
@@ -72,7 +83,6 @@ def upsert_book(data: dict) -> int:
     cur = conn.execute(sql, list(data.values()))
     conn.commit()
     book_id = cur.lastrowid
-    # If updated (not inserted), fetch the real id
     if book_id == 0 or cur.rowcount == 0:
         row = conn.execute(
             "SELECT id FROM books WHERE title = ? AND author = ?",
@@ -83,114 +93,133 @@ def upsert_book(data: dict) -> int:
     return book_id
 
 
-def get_all_books():
+def get_all_books(user: str = "default"):
+    """Return all books with personal fields scoped to the given user."""
     conn = get_conn()
-    rows = conn.execute("SELECT * FROM books ORDER BY title").fetchall()
+    rows = conn.execute("""
+        SELECT b.*,
+               COALESCE(ur.avg_rating,        NULL) AS avg_rating,
+               COALESCE(ur.times_checked_out, 0)    AS times_checked_out
+        FROM books b
+        LEFT JOIN user_ratings ur ON ur.book_id = b.id AND ur.user = ?
+        ORDER BY b.title
+    """, (user,)).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
 
-def get_book(book_id: int):
+def get_book(book_id: int, user: str = "default"):
+    """Return a single book with personal fields scoped to the given user."""
     conn = get_conn()
-    row = conn.execute("SELECT * FROM books WHERE id = ?", (book_id,)).fetchone()
+    row = conn.execute("""
+        SELECT b.*,
+               COALESCE(ur.avg_rating,        NULL) AS avg_rating,
+               COALESCE(ur.times_checked_out, 0)    AS times_checked_out
+        FROM books b
+        LEFT JOIN user_ratings ur ON ur.book_id = b.id AND ur.user = ?
+        WHERE b.id = ?
+    """, (user, book_id)).fetchone()
     conn.close()
     return dict(row) if row else None
 
 
-def get_checked_out_unrated():
-    """Books currently checked out with no rating yet."""
+def get_checked_out_unrated(user: str = "default"):
+    """Books currently checked out by this user with no rating yet."""
     conn = get_conn()
     rows = conn.execute("""
         SELECT b.id, b.title, b.author, c.id as checkout_id
         FROM checkouts c
         JOIN books b ON b.id = c.book_id
-        WHERE c.return_date IS NULL AND c.rating IS NULL
+        WHERE c.user = ? AND c.return_date IS NULL AND c.rating IS NULL
         ORDER BY c.checkout_date
-    """).fetchall()
+    """, (user,)).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
 
-def add_checkout(book_id: int):
+def add_checkout(book_id: int, user: str = "default"):
     conn = get_conn()
     conn.execute(
-        "INSERT INTO checkouts (book_id) VALUES (?)", (book_id,)
+        "INSERT INTO checkouts (book_id, user) VALUES (?, ?)", (book_id, user)
     )
-    conn.execute(
-        "UPDATE books SET times_checked_out = times_checked_out + 1 WHERE id = ?",
-        (book_id,)
-    )
+    conn.execute("""
+        INSERT INTO user_ratings (user, book_id, times_checked_out)
+        VALUES (?, ?, 1)
+        ON CONFLICT(user, book_id) DO UPDATE SET
+            times_checked_out = times_checked_out + 1
+    """, (user, book_id))
     conn.commit()
     conn.close()
 
 
 def record_rating(checkout_id: int, rating: float):
+    """Save a rating for a checkout. User is inferred from the checkout record."""
     conn = get_conn()
+    checkout = conn.execute(
+        "SELECT book_id, user FROM checkouts WHERE id = ?", (checkout_id,)
+    ).fetchone()
+    book_id, user = checkout["book_id"], checkout["user"]
+
     conn.execute(
         "UPDATE checkouts SET rating = ?, return_date = date('now') WHERE id = ?",
         (rating, checkout_id)
     )
-    # Recalculate avg_rating for the book
+    avg = conn.execute(
+        "SELECT AVG(rating) FROM checkouts WHERE book_id = ? AND user = ? AND rating IS NOT NULL",
+        (book_id, user)
+    ).fetchone()[0]
     conn.execute("""
-        UPDATE books SET avg_rating = (
-            SELECT AVG(rating) FROM checkouts
-            WHERE book_id = books.id AND rating IS NOT NULL
-        )
-        WHERE id = (SELECT book_id FROM checkouts WHERE id = ?)
-    """, (checkout_id,))
+        INSERT INTO user_ratings (user, book_id, avg_rating)
+        VALUES (?, ?, ?)
+        ON CONFLICT(user, book_id) DO UPDATE SET avg_rating = excluded.avg_rating
+    """, (user, book_id, avg))
     conn.commit()
     conn.close()
 
 
-def rate_book_direct(book_id: int, rating: float):
-    """Create a completed checkout record with a rating in one step.
-    Used for seeding ratings without going through the checkout flow."""
+def rate_book_direct(book_id: int, rating: float, user: str = "default"):
+    """Create a completed checkout with a rating in one step (seed ratings)."""
     conn = get_conn()
     conn.execute(
-        """INSERT INTO checkouts (book_id, checkout_date, return_date, rating)
-           VALUES (?, date('now'), date('now'), ?)""",
-        (book_id, rating)
+        "INSERT INTO checkouts (book_id, user, checkout_date, return_date, rating) "
+        "VALUES (?, ?, date('now'), date('now'), ?)",
+        (book_id, user, rating)
     )
-    conn.execute(
-        "UPDATE books SET times_checked_out = times_checked_out + 1 WHERE id = ?",
-        (book_id,)
-    )
+    avg = conn.execute(
+        "SELECT AVG(rating) FROM checkouts WHERE book_id = ? AND user = ? AND rating IS NOT NULL",
+        (book_id, user)
+    ).fetchone()[0]
     conn.execute("""
-        UPDATE books SET avg_rating = (
-            SELECT AVG(rating) FROM checkouts
-            WHERE book_id = ? AND rating IS NOT NULL
-        ) WHERE id = ?
-    """, (book_id, book_id))
+        INSERT INTO user_ratings (user, book_id, avg_rating, times_checked_out)
+        VALUES (?, ?, ?, 1)
+        ON CONFLICT(user, book_id) DO UPDATE SET
+            avg_rating = excluded.avg_rating,
+            times_checked_out = times_checked_out + 1
+    """, (user, book_id, avg))
     conn.commit()
     conn.close()
 
 
-def export_ratings():
-    """Return all rating data as a serialisable dict.
-
-    Exports:
-    - checkouts table (every row)
-    - per-book personal fields (avg_rating, times_checked_out) keyed by (title, author)
-      so they survive a catalog re-scrape where numeric IDs may change.
-    """
+def export_ratings(user: str = "default"):
+    """Return rating data for a single user as a serialisable dict."""
     conn = get_conn()
     checkouts = [dict(r) for r in conn.execute(
-        "SELECT c.*, b.title, b.author FROM checkouts c JOIN books b ON b.id = c.book_id"
+        "SELECT c.*, b.title, b.author FROM checkouts c "
+        "JOIN books b ON b.id = c.book_id WHERE c.user = ?",
+        (user,)
     ).fetchall()]
     book_ratings = [dict(r) for r in conn.execute(
-        "SELECT title, author, avg_rating, times_checked_out "
-        "FROM books WHERE avg_rating IS NOT NULL OR times_checked_out > 0"
+        "SELECT b.title, b.author, ur.avg_rating, ur.times_checked_out "
+        "FROM user_ratings ur JOIN books b ON b.id = ur.book_id WHERE ur.user = ?",
+        (user,)
     ).fetchall()]
     conn.close()
-    return {"checkouts": checkouts, "book_ratings": book_ratings}
+    return {"user": user, "checkouts": checkouts, "book_ratings": book_ratings}
 
 
-def import_ratings(data: dict):
-    """Restore ratings exported by export_ratings().
-
-    Matches books by (title, author). Skips any book not found in the current
-    catalog. Returns (restored, skipped) counts.
-    """
+def import_ratings(data: dict, user: str = "default"):
+    """Restore ratings from export_ratings(). Matches books by title + author.
+    Returns (restored, skipped) counts."""
     conn = get_conn()
     restored = skipped = 0
 
@@ -202,10 +231,13 @@ def import_ratings(data: dict):
         if not row:
             skipped += 1
             continue
-        conn.execute(
-            "UPDATE books SET avg_rating = ?, times_checked_out = ? WHERE id = ?",
-            (br["avg_rating"], br["times_checked_out"], row["id"])
-        )
+        conn.execute("""
+            INSERT INTO user_ratings (user, book_id, avg_rating, times_checked_out)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(user, book_id) DO UPDATE SET
+                avg_rating = excluded.avg_rating,
+                times_checked_out = excluded.times_checked_out
+        """, (user, row["id"], br["avg_rating"], br["times_checked_out"]))
         restored += 1
 
     for c in data.get("checkouts", []):
@@ -217,14 +249,15 @@ def import_ratings(data: dict):
             continue
         book_id = row["id"]
         exists = conn.execute(
-            "SELECT id FROM checkouts WHERE book_id = ? AND checkout_date = ? AND rating IS ?",
-            (book_id, c["checkout_date"], c["rating"])
+            "SELECT id FROM checkouts WHERE book_id = ? AND user = ? "
+            "AND checkout_date = ? AND rating IS ?",
+            (book_id, user, c["checkout_date"], c["rating"])
         ).fetchone()
         if not exists:
             conn.execute(
-                "INSERT INTO checkouts (book_id, checkout_date, return_date, rating, notes) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (book_id, c["checkout_date"], c["return_date"], c["rating"], c.get("notes"))
+                "INSERT INTO checkouts (book_id, user, checkout_date, return_date, rating, notes) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (book_id, user, c["checkout_date"], c["return_date"], c["rating"], c.get("notes"))
             )
 
     conn.commit()
@@ -232,13 +265,93 @@ def import_ratings(data: dict):
     return restored, skipped
 
 
-def search_books(query: str):
+def get_ratings_by_book_ids(book_ids: list, user: str = "default") -> dict:
+    """Return {book_id: avg_rating} for the given book_ids and user."""
+    if not book_ids:
+        return {}
     conn = get_conn()
-    like = f"%{query}%"
-    rows = conn.execute("""
-        SELECT * FROM books
-        WHERE title LIKE ? OR author LIKE ? OR description LIKE ? OR subject LIKE ?
-        ORDER BY title
-    """, (like, like, like, like)).fetchall()
+    placeholders = ",".join("?" * len(book_ids))
+    rows = conn.execute(
+        f"SELECT book_id, avg_rating FROM user_ratings "
+        f"WHERE user = ? AND book_id IN ({placeholders})",
+        [user] + list(book_ids)
+    ).fetchall()
+    conn.close()
+    return {r["book_id"]: r["avg_rating"] for r in rows}
+
+
+def get_book_ids_by_title_author(books: list) -> dict:
+    """
+    Fallback lookup: match by (title, author) for books missing a metadata_id match.
+    `books` is a list of dicts with at least 'title' and 'author' keys.
+    Returns {(title, author): book_id}.
+    """
+    if not books:
+        return {}
+    conn = get_conn()
+    result = {}
+    for b in books:
+        row = conn.execute(
+            "SELECT id FROM books WHERE title = ? AND author = ?",
+            (b["title"], b["author"])
+        ).fetchone()
+        if row:
+            result[(b["title"], b["author"])] = row["id"]
+    conn.close()
+    return result
+
+
+def get_book_ids_by_metadata(metadata_ids: list) -> dict:
+    """Return {metadata_id: book_id} for the given metadata_ids."""
+    if not metadata_ids:
+        return {}
+    conn = get_conn()
+    placeholders = ",".join("?" * len(metadata_ids))
+    rows = conn.execute(
+        f"SELECT id, metadata_id FROM books WHERE metadata_id IN ({placeholders})",
+        metadata_ids
+    ).fetchall()
+    conn.close()
+    return {r["metadata_id"]: r["id"] for r in rows}
+
+
+def search_books(query: str = None, user: str = "default",
+                 title: str = None, author: str = None):
+    """Search books. Filters are ANDed together.
+
+    - query:  matches title, author, description, or subject
+    - title:  matches title only
+    - author: matches author only
+    """
+    conn = get_conn()
+    conditions = []
+    params = [user]
+
+    if query:
+        conditions.append(
+            "(b.title LIKE ? OR b.author LIKE ? OR b.description LIKE ? OR b.subject LIKE ?)"
+        )
+        like = f"%{query}%"
+        params += [like, like, like, like]
+
+    if title:
+        conditions.append("b.title LIKE ?")
+        params.append(f"%{title}%")
+
+    if author:
+        conditions.append("b.author LIKE ?")
+        params.append(f"%{author}%")
+
+    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+
+    rows = conn.execute(f"""
+        SELECT b.*,
+               COALESCE(ur.avg_rating,        NULL) AS avg_rating,
+               COALESCE(ur.times_checked_out, 0)    AS times_checked_out
+        FROM books b
+        LEFT JOIN user_ratings ur ON ur.book_id = b.id AND ur.user = ?
+        {where}
+        ORDER BY b.title
+    """, params).fetchall()
     conn.close()
     return [dict(r) for r in rows]

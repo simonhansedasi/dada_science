@@ -31,13 +31,13 @@ def _build_text(book: dict) -> str:
     return " ".join(p for p in parts if p).lower()
 
 
-def recommend(age: str = None, step_fn=None):
+def recommend(user: str = "default", age: str = None, step_fn=None):
     def step(msg):
         if step_fn:
             step_fn(msg)
 
     step("Loading catalog...")
-    books = get_all_books()
+    books = get_all_books(user)
     if not books:
         return None, "No books in database. Run `import` first."
 
@@ -75,7 +75,10 @@ def recommend(age: str = None, step_fn=None):
     if liked:
         step(f"Building taste profile from {len(liked)} loved book(s)...")
         liked_indices = [id_to_idx[b["id"]] for b in liked]
-        profile = np.asarray(tfidf_matrix[liked_indices].mean(axis=0))
+        weights = np.array([b["avg_rating"] for b in liked])
+        profile = np.average(
+            tfidf_matrix[liked_indices].toarray(), axis=0, weights=weights
+        ).reshape(1, -1)
     else:
         # Fall back to all checked-out books if no ratings yet
         checked_list = [b for b in books if b["id"] in checked_ids]

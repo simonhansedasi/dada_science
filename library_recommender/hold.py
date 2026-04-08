@@ -158,29 +158,35 @@ def place_hold(session, account_id, metadata_id, pickup_branch_id):
     Raises RuntimeError with the API error message on failure.
     """
     payload = {
-        "accountId":    account_id,
-        "materialType": "PHYSICAL",
-        "metadataId":   metadata_id,
+        "accountId":             int(account_id),
+        "materialType":          "PHYSICAL",
+        "metadataId":            metadata_id,
+        "enableSingleClickHolds": True,
         "materialParams": {
-            "pickupBranchId": str(pickup_branch_id),
+            "branchId":            str(pickup_branch_id),
+            "expiryDate":          None,
+            "errorMessageLocale":  "en-US",
         },
     }
-    resp = session.post(
-        HOLDS_URL,
-        json=payload,
-        headers={"Content-Type": "application/json"},
-        timeout=15,
-    )
+    token = next((c.value for c in session.cookies if c.name == "bc_access_token"), None)
+    headers = {
+        "Content-Type": "application/json",
+        "Origin":  "https://sno-isle.bibliocommons.com",
+        "Referer": "https://sno-isle.bibliocommons.com/holds",
+    }
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    resp = session.post(HOLDS_URL, json=payload, headers=headers, timeout=15)
 
     if resp.status_code in (200, 201):
         return resp.json()
 
-    # Try to extract a human-readable error
     try:
         err = resp.json().get("error", {})
         msg = err.get("message") or str(err)
     except Exception:
-        msg = resp.text[:200]
+        msg = resp.text[:500]
     raise RuntimeError(f"Hold failed ({resp.status_code}): {msg}")
 
 
