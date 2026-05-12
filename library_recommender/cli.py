@@ -8,6 +8,7 @@ import csv
 import json
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 
 # Load .env before Click resolves envvar= options (LIBRARY_USER, SNOISLE_BRANCH, etc.)
@@ -46,7 +47,8 @@ def _display_title(book: dict) -> str:
     return t
 
 
-def _book_panel(book: dict, score: float = None, label: str = "") -> Panel:
+def _book_panel(book: dict, score: float = None, label: str = "",
+                avail_str: str = None, branch_name: str = None) -> Panel:
     lines = []
     if book.get("author"):
         lines.append(f"[dim]by[/dim] {book['author']}")
@@ -70,6 +72,8 @@ def _book_panel(book: dict, score: float = None, label: str = "") -> Panel:
         engagement.append(f"[dim]{book['false_starts']}x false start[/dim]")
     if engagement:
         lines.append(f"[dim]Engagement:[/dim] {' · '.join(engagement)}")
+    if avail_str is not None and branch_name:
+        lines.append(f"[dim]{branch_name}:[/dim] {avail_str}")
     if book.get("description"):
         desc = book["description"]
         if len(desc) > 200:
@@ -149,6 +153,52 @@ def recommend(obj, age, hold_all, branch, card, pin):
         console.print(f"[red]{err}[/red]")
         sys.exit(1)
 
+    # ── Availability at home branch ────────────────────────────────────────────
+    avail_map = {}
+    home_branch_name = None
+    home_branch_id = os.environ.get("SNOISLE_BRANCH")
+    if home_branch_id:
+        all_rec_books = (
+            [b for b, _ in result["top"]]
+            + [b for b, _ in result["experimental"]]
+            + result["bottom"]
+        )
+        with console.status("[dim]Checking availability at home branch...[/dim]"):
+            try:
+                home_branch_name = dict(holds_mod.get_branches()).get(
+                    str(home_branch_id), f"Branch {home_branch_id}"
+                )
+            except Exception:
+                home_branch_name = f"Branch {home_branch_id}"
+
+            def _fetch_avail(book):
+                if not book.get("metadata_id"):
+                    return book["id"], []
+                try:
+                    return book["id"], holds_mod.get_availability(book["metadata_id"])
+                except Exception:
+                    return book["id"], []
+
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                for book_id, copies in executor.map(_fetch_avail, all_rec_books):
+                    branch_copies = [c for c in copies
+                                     if c.get("branch_code") == str(home_branch_id)]
+                    if not branch_copies:
+                        avail_map[book_id] = "[dim]no copies here[/dim]"
+                    else:
+                        avail_copies = [c for c in branch_copies if c["status"] == "AVAILABLE"]
+                        n_avail = len(avail_copies)
+                        total   = len(branch_copies)
+                        if n_avail:
+                            c0   = avail_copies[0]
+                            call = (c0.get("call_number") or "").strip()
+                            coll = (c0.get("collection")  or "").strip()
+                            loc  = "  [dim]" + "  ·  ".join(p for p in [call, coll] if p) + "[/dim]"
+                            avail_map[book_id] = f"[green]on shelf ({n_avail})[/green]{loc}"
+                        else:
+                            copies_word = "copy" if total == 1 else "copies"
+                            avail_map[book_id] = f"[dim]checked out ({total} {copies_word})[/dim]"
+
     if result["has_profile"]:
         console.print(
             f"\n[dim]Profile built from {result['liked_count']} highly-rated book(s).[/dim]\n"
@@ -165,7 +215,9 @@ def recommend(obj, age, hold_all, branch, card, pin):
         border_style="green", box=box.ROUNDED
     ))
     for i, (book, score) in enumerate(result["top"], 1):
-        console.print(_book_panel(book, score, label=f"[green]{i}.[/green]"))
+        console.print(_book_panel(book, score, label=f"[green]{i}.[/green]",
+                                  avail_str=avail_map.get(book["id"]),
+                                  branch_name=home_branch_name))
 
     console.print("\n")
     console.print(Panel(
@@ -174,7 +226,9 @@ def recommend(obj, age, hold_all, branch, card, pin):
         border_style="magenta", box=box.ROUNDED
     ))
     for i, (book, score) in enumerate(result["experimental"], 1):
-        console.print(_book_panel(book, score, label=f"[magenta]{i}.[/magenta]"))
+        console.print(_book_panel(book, score, label=f"[magenta]{i}.[/magenta]",
+                                  avail_str=avail_map.get(book["id"]),
+                                  branch_name=home_branch_name))
 
     console.print("\n")
     console.print(Panel(
@@ -183,7 +237,9 @@ def recommend(obj, age, hold_all, branch, card, pin):
         border_style="yellow", box=box.ROUNDED
     ))
     for i, book in enumerate(result["bottom"], 1):
-        console.print(_book_panel(book, label=f"[yellow]{i}.[/yellow]"))
+        console.print(_book_panel(book, label=f"[yellow]{i}.[/yellow]",
+                                  avail_str=avail_map.get(book["id"]),
+                                  branch_name=home_branch_name))
 
     console.print(
         "\n[dim]availability [bold]<id>[/bold]    check which branches have it and if it's on the shelf[/dim]"
