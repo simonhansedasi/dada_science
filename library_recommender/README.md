@@ -248,7 +248,7 @@ The primary workflow for rating an entire batch of checked-out books at once. Re
 
 ```bash
 # 1. Export currently checked-out books to a CSV
-./library export-account-csv                       # writes ratings_export_YYYY-MM-DD.csv
+./library export-account-csv                       # writes currently_out_YYYY-MM-DD.csv
 ./library export-account-csv myratings.csv         # custom path
 
 # 2. Open the CSV in any spreadsheet, fill in the columns you want, save
@@ -256,7 +256,7 @@ The primary workflow for rating an entire batch of checked-out books at once. Re
 #             reread_demands, false_starts
 
 # 3. Apply the filled-in data
-./library import-ratings-csv ratings_export_2025-06-01.csv
+./library import-ratings-csv currently_out_2025-06-01.csv
 ./library --user madeleine import-ratings-csv myratings.csv
 ```
 

@@ -83,7 +83,7 @@ Before the recommender can personalize suggestions it needs a few ratings. Use `
 ```bash
 ./library export-account-csv          # export current checkouts
 # fill in the CSV, then:
-./library import-ratings-csv ratings_export_YYYY-MM-DD.csv
+./library import-ratings-csv currently_out_YYYY-MM-DD.csv
 ```
 
 **One-liner** — if you know the ID:
@@ -172,13 +172,13 @@ Books that show `?` for id aren't in the local catalog yet — re-run the scrape
 
 ```bash
 # 1. Export currently checked-out books
-./library export-account-csv          # writes ratings_export_YYYY-MM-DD.csv
+./library export-account-csv          # writes currently_out_YYYY-MM-DD.csv
 
 # 2. Open CSV in any spreadsheet, fill in: rating, times_read, reread_demands, false_starts
 #    Leave cells blank to skip them — blank = don't change what's already stored
 
 # 3. Apply the data
-./library import-ratings-csv ratings_export_2025-06-01.csv
+./library import-ratings-csv currently_out_2025-06-01.csv
 ```
 
 Values are SET (not incremented). `times_read=5` stores 5 total — it doesn't add 5 to whatever was there.

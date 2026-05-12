@@ -858,7 +858,7 @@ def export_account_csv(obj, path, card, pin):
 
     \b
     Usage:
-      ./library export-account-csv                    # writes ratings_export_YYYY-MM-DD.csv
+      ./library export-account-csv                    # writes currently_out_YYYY-MM-DD.csv
       ./library export-account-csv myratings.csv      # custom path
     """
     user = obj["user"]
@@ -916,7 +916,7 @@ def export_account_csv(obj, path, card, pin):
         })
 
     if path is None:
-        path = f"ratings_export_{date.today()}.csv"
+        path = f"currently_out_{date.today()}.csv"
 
     with open(path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=[
@@ -928,7 +928,7 @@ def export_account_csv(obj, path, card, pin):
 
     console.print(
         f"[green]Exported[/green] {len(rows)} book(s) to [bold]{path}[/bold]\n"
-        f"[dim]Fill in rating / times_read / reread_demands / false_starts, then run:\n"
+        f"[dim]Fill in rating / times_read / reread_demands / false_starts, then:\n"
         f"  [bold]./library import-ratings-csv {path}[/bold][/dim]\n"
     )
 
@@ -1156,12 +1156,12 @@ def import_ratings_csv(obj, path):
 
     \b
     Usage:
-      ./library import-ratings-csv                              # reads ratings_export_<today>.csv
-      ./library import-ratings-csv ratings_export_2025-06-01.csv
+      ./library import-ratings-csv                              # reads currently_out_<today>.csv
+      ./library import-ratings-csv currently_out_2025-06-01.csv
     """
     user = obj["user"]
     if path is None:
-        path = f"ratings_export_{date.today()}.csv"
+        path = f"currently_out_{date.today()}.csv"
     try:
         with open(path, newline="") as f:
             reader = csv.DictReader(f)
