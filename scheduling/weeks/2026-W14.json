@@ -1,0 +1,430 @@
+{
+  "week": "2026-W14",
+  "start": "2026-03-30",
+  "end": "2026-04-05",
+  "days": {
+    "2026-03-30": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "m30a1",
+          "time": "09:00",
+          "title": "Pu'ukohola Heiau NHS",
+          "notes": "Kawaihae, 20 min north. FREE. Largest restored heiau in Hawaii, built 1790–91 by Kamehameha I. STROLLER OK — paved accessible loop from parking to heiau base. HEAT: fully exposed, no shade — go early, 30 min max outside, back in AC by 10am. Closed-toe shoes, hat, sunscreen, cold water. Watch Heiki closely — retreat at first sign of fussiness. Open 8:30am–4:30pm. Visitor center + accessible restrooms on site.",
+          "location": "Pu'ukohola Heiau National Historic Site, Kawaihae, HI 96743",
+          "tags": [
+            "🧒",
+            "🏛️"
+          ],
+          "gcal_event_id": "nglbqvc8m6da2qtm6pmeipu5cc"
+        },
+        {
+          "id": "m30a2",
+          "time": "10:30",
+          "title": "Spencer Beach",
+          "notes": "Right next door to Heiau — ideal cool-down stop after. Calm reef-protected water — perfect for wading and cooling off overheated toddler. STROLLER OK — flat sand, paved access. Sandals + water shoes for rocky water entry. Lifeguards weekends + holidays 9:30am–4:45pm. Restrooms, showers, playground on site. This IS the cool-down — let Heiki splash, no rush, stay as long as he's happy.",
+          "location": "Spencer Beach Park, Kawaihae, HI 96743",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "hkcd898bqnffultmfrk8eptfok"
+        },
+        {
+          "id": "m30a4",
+          "time": "14:30",
+          "title": "Kings' Shops — pick up lava rocks for Wednesday craft",
+          "notes": "15 min from home, on the way back from Heiau area. Look for: smooth pāhoehoe pieces (safe for little hands, good painting surface), a chunk of ʻaʻā (rough contrast for sorting), and pumice if available (lightweight, porous, floats in water — great toddler demo). Gift shops or any local rock vendor in the complex.",
+          "location": "Kings' Shops, 250 Waikoloa Beach Dr, Waikoloa Village, HI 96738",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "hji24ii728sgm9oasip348vvmo"
+        },
+        {
+          "id": "m30a3",
+          "time": "19:00",
+          "title": "Manta Ray Night Snorkel",
+          "notes": "BOOKED — confirm pickup time. Grandma on toddler/bedtime duty.",
+          "location": "Honokohau Small Boat Harbor, Kailua-Kona, HI 96740",
+          "tags": [
+            "👫",
+            "⚠️"
+          ],
+          "gcal_event_id": "saecvlhotu993oal0e8vm4pu18"
+        },
+        {
+          "id": "1ef9f163",
+          "time": "20:10",
+          "title": "Manta Magic - Moonlight Manta Magic Tour with Hawaii Oceanic",
+          "notes": "Booking #328661566 \n\n View details: https://fareharbor.com/embeds/book/hawaiioceanic/items/63264/booking/20af9e90-eeaa-4957-a887-5aff11caab5e/",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "_8coj4c9n68p30b9o64q44b9k6sq3cb9p88p4cba66h342e1p64rkagpi8o",
+          "calendar": "vitruviansandwich@gmail.com",
+          "all_day": false
+        },
+        {
+          "id": "m30_pool",
+          "time": "13:30",
+          "title": "Pool time at home",
+          "notes": "After beach and errands — rest, hydrate, backyard or community pool before manta night.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "gh7a07de1jd92pgp6vvaftscvs"
+        }
+      ],
+      "gcal_nap_event_id": "n91rfukhdje7g3632alfoapdec"
+    },
+    "2026-03-31": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "t31a1",
+          "time": "09:00",
+          "title": "Home reading",
+          "notes": "Books from home. Quiet morning in before the walk.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "8pn5ule5dcb53i73jav8tl1oac"
+        },
+        {
+          "id": "t31a2",
+          "time": "10:30",
+          "title": "Waikoloa Dry Forest walk — SHORT",
+          "notes": "HEAT + TERRAIN ADVISORY: rough uneven lava throughout, no stroller, carrier required. Fully exposed, hot and dry — highest heat-rash risk of the week given no shade and no water nearby. OPTION A: skip it — replace with pool morning (recommended if Heiki is still recovering). OPTION B: go only if cool and early — depart by 8am, 20 min max, abort immediately if Heiki fusses. Complete digital waiver at waikoloadryforest.org before going. NOT a guided tour day (first Fridays only). Closed-toe shoes, lots of water, carrier. Call ahead: (808) 494-2208. Entrance: Quarry Road, Waikoloa.",
+          "location": "Waikoloa Dry Forest Initiative, Waikoloa, HI 96738",
+          "tags": [
+            "🧒",
+            "🌋"
+          ],
+          "gcal_event_id": "gc56mq6q1qjmgcjfe6p502akqc"
+        },
+        {
+          "id": "t31a3",
+          "time": "14:30",
+          "title": "Waimea town — Anna Ranch + local lunch",
+          "notes": "Grandma on toddler duty. 30 min north at 2,700ft — completely different climate zone. Anna Ranch Heritage Center or browse the village. Drive Kohala Mountain Road for the lava-to-pasture transition.",
+          "location": "Anna Ranch Heritage Center, 65-1480 Kawaihae Rd, Kamuela, HI 96743",
+          "tags": [
+            "👫",
+            "🏛️"
+          ],
+          "gcal_event_id": "fuq3eavf6ogu57t83iev2nakgg"
+        },
+        {
+          "id": "t31_pool",
+          "time": "09:00",
+          "title": "Pool morning (alt. to Dry Forest)",
+          "notes": "Recommended if Heiki is still recovering from heat. Cool, relaxed, low-risk. Swap with Dry Forest if needed.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "13brog7ujlnpk4ta5evsltffb8"
+        }
+      ],
+      "gcal_nap_event_id": "dblcnniccml1ipbuvq34b53fr0"
+    },
+    "2026-04-01": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "w01a1",
+          "time": "09:00",
+          "title": "Lava rock sorting craft",
+          "notes": "Use the rocks picked up at Kings' Shops on Monday. Sort ʻaʻā (rough) vs pāhoehoe (smooth) — talk viscosity, eruption style, flow rate. Drop pumice in a bowl of water to show it floats. Even a 2-year-old can sort rough vs smooth.",
+          "location": "",
+          "tags": [
+            "🧒",
+            "🌋"
+          ],
+          "gcal_event_id": "8verm2qdm8ch4rb9vss8d86huk"
+        },
+        {
+          "id": "w01a2",
+          "time": "10:30",
+          "title": "Ho'oko Park",
+          "notes": "15 min from home. Free playground, open 6:30am. HEAT: go early — aim to arrive by 8:30am and be back in AC by 9:30am. 30 min max. Bring water for Heiki. If playground equipment feels hot to touch, skip it — metal burns.",
+          "location": "Ho'oko Street Park, Waikoloa Village, HI 96738",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "pcuoa8ptemo1g7m8ti4cu6mtgg"
+        },
+        {
+          "id": "w01a3",
+          "time": "14:30",
+          "title": "Petroglyph-inspired art",
+          "notes": "Paper and crayons at home. Make your own 'carvings' inspired by Saturday's Reserve visit. Ancient Hawaiian mark-making meets toddler scribbles.",
+          "location": "",
+          "tags": [
+            "🧒",
+            "🏛️"
+          ],
+          "gcal_event_id": "318qb32mkv4onmbsv7q54jrsv0"
+        },
+        {
+          "id": "w01a4",
+          "time": "18:00",
+          "title": "KPC Dinner — Kamuela Provision Company",
+          "notes": "Hilton Waikoloa Village, ~10 min. Romantic patio over Waiulua Bay. Upscale surf 'n' turf, locally sourced. Grandma on toddler duty. BOOK NOW: call Hilton or OpenTable.",
+          "location": "Kamuela Provision Company, Hilton Waikoloa Village, 69-425 Waikoloa Beach Dr, Waikoloa Village, HI 96738",
+          "tags": [
+            "👫",
+            "⚠️"
+          ],
+          "gcal_event_id": "imvuk575cfrs1lckkcd5o5qb60"
+        },
+        {
+          "id": "ee77bd62",
+          "time": "17:00",
+          "title": "Recycling",
+          "notes": "",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "efi33ems4ukqjktmj4ta0tlm7k_20260402T030000Z",
+          "calendar": "woses21@gmail.com",
+          "all_day": false
+        },
+        {
+          "id": "ddca2e48",
+          "time": "17:00",
+          "title": "Trash",
+          "notes": "",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "scon2ae1ofbp2pam3sicdc6kts_20260402T030000Z",
+          "calendar": "woses21@gmail.com",
+          "all_day": false
+        },
+        {
+          "id": "w01_pool",
+          "time": "11:30",
+          "title": "Pool / backyard cool-down",
+          "notes": "After park and craft morning. Midday in the pool before nap.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "6prudimajpo1j8d5nij18d6ik4"
+        }
+      ],
+      "gcal_nap_event_id": "eogp2en4hn7m1nl4jgese8u3oc"
+    },
+    "2026-04-02": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "h02a0",
+          "time": "08:30",
+          "title": "Hit the road — Ka'u day trip",
+          "notes": "Adults only. ~2.5 hrs south. Toddler stays home with grandma.",
+          "location": "",
+          "tags": [
+            "👫"
+          ],
+          "gcal_event_id": "b86fleemodrrts9t0v9k66nd18"
+        },
+        {
+          "id": "h02a2",
+          "time": "11:00",
+          "title": "Bay View Farm — guided tour",
+          "notes": "Pahala. Free guided tours 11am + 1pm Mon–Fri — arrive 15 min early to secure a spot. GPS NOTE: address is 96-2694 Wood Valley Road — described as 'hard to find' with limited signage. Confirm route before leaving. Tour covers orchards, sorting, milling, sun-drying, roasting. Free coffee samples included. On-site café: coffee drinks, espresso, pastries, sandwiches with outdoor orchard views. Gift shop. Terrain: mostly flat paved/gravel + unpaved orchard paths. Stroller partial — main area OK. Comfortable walking shoes. Flip-flops fine for tasting room; closed-toe better for orchard paths. Ka'u coffee is award-winning and less touristy than Kona — a genuine find. ~1hr total.",
+          "location": "Bay View Farm, Pahala, HI",
+          "tags": [
+            "👫",
+            "🌋"
+          ],
+          "gcal_event_id": "1pas2b0gaq8lpmslkvb7v0ktmg"
+        },
+        {
+          "id": "h02a3",
+          "time": "12:30",
+          "title": "South Point / Ka Lae",
+          "notes": "Southernmost point in the US — 12-mile narrow paved road off Hwy 11 (mile markers 69–70). Pull over for oncoming traffic. NO STROLLER — rocky, uneven lava cliff terrain with no maintained trails or guardrails. Closed-toe sturdy shoes required. BRING: windproof layer (consistently strong winds), water + snacks (NO services at point), sunscreen, fully charged phone with offline maps (cell service unreliable). Secure all loose items — wind will carry things. Leave no valuables in car (break-ins reported). DANGER: Halaea Current is extremely powerful — swimming NOT recommended under any circumstances. Cliff jumping: no guardrails, multiple drownings recorded, no rescue services nearby. Kalalea Heiau on site — sacred, do not touch or sit on walls. Adults-only stop — not suitable with Heiki. Green Sand Beach is an additional 5.5mi hike or paid 4WD shuttle (~$15–25/person cash) — add 2+ hrs if going.",
+          "location": "Ka Lae (South Point), South Point Rd, Na'alehu, HI 96772",
+          "tags": [
+            "👫",
+            "🌋"
+          ],
+          "gcal_event_id": "8ljf8jrtev6ift9ru4b79j342k"
+        },
+        {
+          "id": "h02a4",
+          "time": "14:00",
+          "title": "Punalu'u Black Sand Beach",
+          "notes": "Black basalt sand + olivine flecks — formed by lava entering ocean. Paved parking, flat easy access. STROLLER OK — paved lot and flat beach access. FOOTWEAR: sandals or water shoes strongly recommended — black sand gets EXTREMELY HOT in sun (burns bare feet fast). Lava rocks sharp at water's edge. TURTLES: sea turtles haul out daily ~11am–6pm. Federal law: stay at LEAST 10 feet away. Do NOT touch, feed, or approach. Fine up to $10,500. Swimming: currents can be strong, rocky entry difficult. Northeast end of beach has fewest rocks; small boat ramp on left is easiest entry. Check conditions first. High surf + rip currents possible in winter. Portuguese man-o-war ~10 days after full moon. DO NOT take black sand — removing natural material from Hawaii state beaches is illegal. Facilities: restrooms, showers, drinking water, covered pavilions, snack bar. Lifeguards daily 8:30am–5pm. Best for turtles: afternoon. Best for crowds: morning. Off Hwy 11 between mile markers 56–57.",
+          "location": "Punalu'u Black Sand Beach, Na'alehu, HI 96772",
+          "tags": [
+            "👫",
+            "🌋"
+          ],
+          "gcal_event_id": "9huvi5tto14m0f71m4ocpl7b54"
+        },
+        {
+          "id": "be454a58",
+          "time": "15:00",
+          "title": "Charlie medine",
+          "notes": "",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "6csm8o9mccq3gbb46kpj8b9k68oj0bb1cphjgbb474pj6d9kcgojcdj4co_20260403T010000Z",
+          "calendar": "woses21@gmail.com",
+          "all_day": false
+        },
+        {
+          "id": "5a7a67c2",
+          "time": "10:00",
+          "title": "Bay View Farm — arrive + self-guided tasting",
+          "notes": "Pahala. Open 9–4. Browse the grounds, taste before the tour. Ka'u district: volcanic soil from Kilauea's rain shadow, high elevation, cloud cover. One of the highest-rated coffees in Hawaii.\n\n👫 🌋",
+          "location": "Bay View Farm, Pahala, HI",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "64fqls3b5s652hhtlpqlqlldmc",
+          "calendar": "simonhansedasi@gmail.com",
+          "all_day": false
+        }
+      ],
+      "gcal_nap_event_id": "uikt0e63cgp6ionkn8461tm8g4"
+    },
+    "2026-04-03": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "f03a1",
+          "time": "07:30",
+          "title": "Puako Petroglyph Field",
+          "notes": "Holoholokai Beach Park, Mauna Lani — 30 min north. DEPART BY 7am TO BEAT THE HEAT — aim to be done and back in AC by 9am. HEAT: 30 min max on exposed lava. Watch Heiki — leave immediately at first mood drop. Stroller OK for first 0.1mi paved section to replica carvings — that may be enough with heat concerns. Full trail: rough lava, kiawe thorns (pierce thin soles), NO stroller — carrier required. Closed-toe sturdy shoes required. Bring LOTS of water, sunscreen, hat. DO NOT touch authentic petroglyphs — replicas near trailhead are touch-permitted. Parking day use fee may apply. Facilities: restrooms, showers at beach park. Hours: 6:30am–6:30pm. Directions: Queen Kaʻahumanu Hwy → Mauna Lani Dr → North Kaniku Dr → Holoholokai Beach Park.",
+          "location": "Holoholokai Beach Park, 68-1400 Mauna Lani Dr, Kohala Coast, HI 96743",
+          "tags": [
+            "🧒",
+            "🌋",
+            "🏛️"
+          ],
+          "gcal_event_id": "tm723h2eis4r0ucmg4vl066f34"
+        },
+        {
+          "id": "f03a2",
+          "time": "14:00",
+          "title": "Beach cool-down — Holoholokai or A-Bay",
+          "notes": "After petroglyphs — stay at Holoholokai Beach Park (already there) or drive back to A-Bay. Let Heiki cool down in the water. Calm beach, shaded spots. Pack a cold drink and snack for the car ride.",
+          "location": "",
+          "tags": [],
+          "gcal_event_id": "1t1plm9kv91uakf66rq5eeiqhg"
+        },
+        {
+          "id": "f03_pool",
+          "time": "10:30",
+          "title": "Pool at home — recovery",
+          "notes": "Back from petroglyphs early. Pool time before nap to fully cool down.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "0m1k0a0guei12icvukr9avghng"
+        }
+      ],
+      "gcal_nap_event_id": "jch1ftmhm5fdbn7v07l4f3ver4"
+    },
+    "2026-04-04": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "s04a1",
+          "time": "09:00",
+          "title": "Slow morning + shave ice",
+          "notes": "Last full day — take it easy. Alii Drive shave ice if time allows. Go early (before 10am) if venturing out — last thing you want is heat rash on departure day. Otherwise: stay home, pool, pack slowly, enjoy the lanai.",
+          "location": "Ali'i Drive, Kailua-Kona, HI 96740",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "opt5esg11v6d5se9d4c0bdm86s"
+        },
+        {
+          "id": "s04a2",
+          "time": "11:00",
+          "title": "Pack + souvenir lava rocks",
+          "notes": "From a local shop, Punalu'u vendors, or HVNP gift shop — NOT from national or state parks.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "5ckcmfs2sv8qd25u4pel4g388c"
+        },
+        {
+          "id": "s04_pool",
+          "time": "10:30",
+          "title": "Pool + pack",
+          "notes": "Last pool session before departure tomorrow. Easy morning, stay cool.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "hfr7pv07t4dk6p1c76ublo3ris"
+        }
+      ],
+      "gcal_nap_event_id": "vg4ob3468r3hutohjft4ui9abo"
+    },
+    "2026-04-05": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "d05a1",
+          "time": "08:00",
+          "title": "Depart ✈️",
+          "notes": "Safe travels.",
+          "location": "Ellison Onizuka Kona International Airport, 73-200 Makala Blvd, Kailua-Kona, HI 96740",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "aahavm43r78ru29t68ro4lu5q0"
+        }
+      ],
+      "gcal_nap_event_id": "frirgia98cbipa1uhfkk8b14n8"
+    },
+    "2026-03-26": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "227f836f",
+          "time": "00:00",
+          "title": "OOO",
+          "notes": "\n",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "_60q30c1g60o30e1i60o4ac1g60rj8gpl88rj2c1h84s34h9g60s30c1g60o30c1g8co44d9p6l246c9n6cok8gpg64o30c1g60o30c1g60o30c1g60o32c1g60o30c1g8d0j2d9h70r3cdhp6h138dpk8d0j0h1i68o4cd1k8ksj2c1k6h1g",
+          "calendar": "vitruviansandwich@gmail.com",
+          "all_day": true
+        }
+      ],
+      "gcal_nap_event_id": "ha36akpikf29gbfdhack6nja70"
+    },
+    "2026-03-29": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "d76a8ac9",
+          "time": "14:00",
+          "title": "A-Bay afternoon",
+          "notes": "Anchialine pond walk, King's Trail, turtles.\n\n🧒 🌋 🏛️",
+          "location": "Anaeho'omalu Bay, 69-275 Waikoloa Beach Dr, Waikoloa, HI 96738",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "0eck2rsc2052vglp9pho6d1f0s",
+          "calendar": "simonhansedasi@gmail.com",
+          "all_day": false
+        }
+      ],
+      "gcal_nap_event_id": "rtpql7nlk7mm7ml9o8omlljse4"
+    }
+  }
+}

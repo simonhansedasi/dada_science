@@ -1,0 +1,107 @@
+{
+  "week": "2026-W13",
+  "start": "2026-03-23",
+  "end": "2026-03-29",
+  "days": {
+    "2026-03-27": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "a1b2c3d4",
+          "time": "08:30",
+          "title": "Hawai'i Keiki Museum",
+          "notes": "Queens' Marketplace. $10/kid $15/adult. Free re-entry within 7 days.",
+          "location": "Queens' MarketPlace, 69-201 Waikoloa Beach Dr, Waikoloa Village, HI 96738",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "bhdnpt1rj8r1r4laajourppeig"
+        },
+        {
+          "id": "e5f6a7b8",
+          "time": "14:00",
+          "title": "Anchialine Ponds (WAPPA)",
+          "notes": "Brackish lava pools, ʻōpaeʻula shrimp. Short mostly-flat walk on uneven lava rock. Sturdy sandals or closed-toe shoes recommended. Stroller: partial — manageable on a sturdy all-terrain stroller, but lava surface is rough. Trail end near beach may flood at high tide. DO NOT enter ponds, throw objects, disturb rocks — UH research preserve, rules enforced. Nene and feral cats present — don't feed. Best at sunset: ponds reflect colors beautifully. Free, no booking.",
+          "location": "Waikoloa Anchialine Pond Preservation Area, Waikoloa Beach Dr, Waikoloa, HI 96738",
+          "tags": [
+            "🧒",
+            "🌋"
+          ],
+          "gcal_event_id": "oluipovsr5geqbl3vnon3rhd50"
+        },
+        {
+          "id": "c9d0e1f2",
+          "time": "16:00",
+          "title": "King's Trail (Ala Kahakai)",
+          "notes": "Ancient coastal lava rock trail — uneven, rough surface. NO STROLLER on the trail itself. Use carrier for Heiki. Sturdy closed-toe shoes required. Ponds viewing area nearby has flat paved path — stroller OK there. DO NOT walk on or remove rocks from historic walls. Bring water and sunscreen — exposed coast, no shade. Ancient fishponds (Kuʻualiʻi and Kahapapa) en route — do not enter the water or fish. Parking lot open 7am–8pm. Best early morning or sunset.",
+          "location": "Anaeho'omalu Bay, 69-275 Waikoloa Beach Dr, Waikoloa, HI 96738",
+          "tags": [
+            "🧒",
+            "🏛️"
+          ],
+          "gcal_event_id": "jt4is5fmpu1gedmaml3qu2esi0"
+        }
+      ],
+      "gcal_nap_event_id": "s81tldrmmnh6tio204q3v1quf8"
+    },
+    "2026-03-28": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "g3h4i5j6",
+          "time": "09:30",
+          "title": "Waikoloa Petroglyph Reserve",
+          "notes": "Free guided tour Thu–Sun 9:30am — start near Kings' Shops gas station, trail to the right. ~0.5 mile round trip, 30–60 min. NO STROLLER — lava surface is uneven and rough throughout, even on marked path. Closed-toe sturdy shoes required — sharp lava rock. NO SHADE WHATSOEVER — sun protection essential (hat, sunscreen, water). DO NOT touch or make rubbings of carvings — destroys centuries-old art. Best light for seeing carvings: early morning or late afternoon (slanting light). Contains thousands of carvings incl. rare horse+warrior post-contact petroglyph. Connects to King's Trail running north/south along coast. Free, no booking.",
+          "location": "Kings' Shops, 250 Waikoloa Beach Dr, Waikoloa Village, HI 96738",
+          "tags": [
+            "🧒",
+            "🏛️"
+          ],
+          "gcal_event_id": "bbi9vk38nbho52lf495j67vr90"
+        }
+      ],
+      "gcal_nap_event_id": "hkf2gf0uofq0qaveg73dil92ms"
+    },
+    "2026-03-29": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "k7l8m9n0",
+          "time": "09:00",
+          "title": "Cheer squad — Lavaman Triathlon",
+          "notes": "Wife + FILs racing — finish line at A-Bay. Live music, beach BBQ. HEAT: stay in shade near water's edge, have a cold drink ready. 30 min max outdoors in direct sun — retreat to car AC if Heiki gets fussy. Sandals fine. Stroller OK on flat sand. Bring water + snacks for Heiki.",
+          "location": "Anaeho'omalu Bay, 69-275 Waikoloa Beach Dr, Waikoloa, HI 96738",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "q61ek7o2up4k1f8e1lsh4rf214"
+        },
+        {
+          "id": "p1q2r3s4",
+          "time": "14:00",
+          "title": "A-Bay afternoon",
+          "notes": "Keep it short and shady — pond walkway is flat and stroller-friendly, brief loop only. HEAT: 30 min max outside. Watch for sudden mood drop (first sign of overheating). Have a cold smoothie or drink ready in the car for the ride home. Skip King's Trail today — too exposed. Ponds walkway + beach shade only. If Kona seems tired or cranky before 30 min, head home — pool is the better option.",
+          "location": "Anaeho'omalu Bay, 69-275 Waikoloa Beach Dr, Waikoloa, HI 96738",
+          "tags": [
+            "🧒",
+            "🌋",
+            "🏛️"
+          ],
+          "gcal_event_id": "0eck2rsc2052vglp9pho6d1f0s"
+        },
+        {
+          "id": "sun_pool",
+          "time": "15:30",
+          "title": "Pool / cool-down at home",
+          "notes": "Recovery after morning heat. Stay home, backyard or community pool. Keep it easy.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "cebha9hh9npfp4mb2actpk6pt8"
+        }
+      ],
+      "gcal_nap_event_id": "5rt6qbpnnvb7aud3h6g91od9o4"
+    }
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "week": "2026-W15",
+  "start": "2026-04-06",
+  "end": "2026-04-12",
+  "days": {
+    "2026-04-06": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "m6a1",
+          "time": "10:00",
+          "title": "Bike ride — Meme + dogs",
+          "notes": "Long ride. Meme arriving around 10.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "t1mnf14jvepfo8aqte2farb8k8"
+        },
+        {
+          "id": "m6a2",
+          "time": "19:00",
+          "title": "Library planner — plan Tuesday trip",
+          "notes": "Use library planner to map out tomorrow's visit. Can also do during nap if energy allows.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "lsqboff9jr3ni0ia2j3to2tkoo"
+        }
+      ],
+      "gcal_nap_event_id": "3o29o7t9tl8r1bgjn7d55dvjhg"
+    },
+    "2026-04-07": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "t7a1",
+          "time": "10:00",
+          "title": "Library trip",
+          "notes": "Plan filled in during Monday evening planner session.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "p2u586m060jp3e8ednslaplia0"
+        }
+      ],
+      "gcal_nap_event_id": "sfl0p2ic2jdqgbeo5uh8e1qp3k"
+    },
+    "2026-04-08": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "w8a1",
+          "time": "10:00",
+          "title": "Tin foil boats — tub float test",
+          "notes": "Make boats from foil, take to the tub. Load with small objects (coins, blocks, rocks) to test how much weight before sinking. Make multiple shapes and race/compare. No supplies needed beyond foil and whatever's around for cargo.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "h70f5nprehlvclq0pta3j0o28k"
+        },
+        {
+          "id": "3d465390",
+          "time": "17:00",
+          "title": "Trash",
+          "notes": "",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "scon2ae1ofbp2pam3sicdc6kts_20260409T030000Z",
+          "calendar": "woses21@gmail.com",
+          "all_day": false
+        }
+      ],
+      "gcal_nap_event_id": "icieb5kjvgjnq40ql1n5il183o"
+    },
+    "2026-04-10": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "f10a1",
+          "time": "10:00",
+          "title": "Mukilteo Lighthouse Park — ferry watching",
+          "notes": "~10-15 min drive. Park at Mukilteo Lighthouse Park (free). Walk to the beach and watch the WSF Mukilteo-Clinton ferry dock, load cars, and depart — time arrival ~15 min before a sailing for full effect. 362-ft car ferry right up close. Lighthouse (1906) to walk around, small Puget Sound beach. Check ferry schedule at wsdot.wa.gov/ferries before leaving. Works fine in light rain.",
+          "location": "Mukilteo Lighthouse Park, 609 Front St, Mukilteo, WA 98275",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "4e5uof6hkf6tv86ukpfhvvnk50"
+        }
+      ],
+      "gcal_nap_event_id": "7vv4qmri2jbfledfk6j50gef48"
+    },
+    "2026-04-09": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "h9a1",
+          "time": "09:30",
+          "title": "Mel & Mia's — mid-morning treat",
+          "notes": "Arriving 9–10 for a treat.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "rtgdmbdn68fjg3r4tqonf9clic"
+        }
+      ],
+      "gcal_nap_event_id": "f6vookckqotscgj8oarv407ql0"
+    },
+    "2026-03-26": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "f8c1a6ad",
+          "time": "00:00",
+          "title": "OOO",
+          "notes": "\n",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "_60q30c1g60o30e1i60o4ac1g60rj8gpl88rj2c1h84s34h9g60s30c1g60o30c1g8co44d9p6l246c9n6cok8gpg64o30c1g60o30c1g60o30c1g60o32c1g60o30c1g8d0j2d9h70r3cdhp6h138dpk8d0j0h1i68o4cd1k8ksj2c1k6h1g",
+          "calendar": "vitruviansandwich@gmail.com",
+          "all_day": true
+        }
+      ],
+      "gcal_nap_event_id": "bostmkcv8e5rdnvkvds2hgekhg"
+    }
+  }
+}

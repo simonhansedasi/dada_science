@@ -70,6 +70,31 @@ Multi-user capable — separate rating histories per parent. See `library_recomm
 
 ---
 
+## Weekly Planner
+
+A personal CLI weekly planner. Draft the week in the terminal, review it, push to Google Calendar for phone access.
+
+**Stack**: Python, Rich, questionary, Google Calendar API v3 (OAuth2), JSON week archive.
+
+```bash
+cd scheduling
+python plan.py show week          # current week
+python plan.py add                # interactive activity creation
+python plan.py push               # push to Google Calendar
+```
+
+Weeks are archived as `weeks/YYYY-WXX.json`. See `scheduling/CONTEXT.md` for full CLI reference.
+
+---
+
+## Personal Tracker (SHELVED 2026-04-15)
+
+Mobile-first Flask app for personal health tracking (sleep, exercise, hydration, mood, time blocks). Service stopped and disabled on Pi — code preserved for reference.
+
+See `personal_tracker/CLAUDE.md` for architecture notes.
+
+---
+
 ## Tech
 
 Python, Flask, SQLite, pandas, NumPy, matplotlib, seaborn, statsmodels (ANOVA/STL/ARIMAX), scikit-learn (TF-IDF), Click, Rich, Requests, Raspberry Pi, Tailscale

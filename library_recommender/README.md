@@ -2,15 +2,17 @@
 
 A command-line tool that helps you pick the best books to check out from the library for your toddler. It scrapes the Sno-Isle library catalog directly into a local database, learns each user's taste from engagement ratings after each visit, and can place holds on recommended books from the command line.
 
-Built for a 2-year-old whose parents rate books 1–5 based on how engaged the child is during read-aloud sessions. Supports multiple users with separate rating profiles.
+Built for a 2-year-old whose parents track engagement using four signals: a 1–5 star rating, completed reading sessions, re-read demands ("again!"), and false starts. Supports multiple users with separate profiles.
 
 ---
 
 ## Plain Language Summary
 
-Run the scraper to pull the Sno-Isle catalog into a local database (`library.db`). When you get recommendations, it shows you 10 books split into three groups: the best overall matches, a couple of "wild card" picks that are similar to what your child loved but that most people overlook, and three books that almost nobody checks out (pure discovery). When you find something you want, place a hold directly from the command line. After each library trip, rate the books you returned, and the system uses those ratings to get better at predicting what your child will engage with next time.
+Run the scraper to pull the Sno-Isle catalog into a local database (`library.db`). When you get recommendations, it shows you 10 books split into three groups: the best overall matches, a couple of "wild card" picks that are similar to what your child loved but that most people overlook, and three books that almost nobody checks out (pure discovery). When you find something you want, place a hold directly from the command line.
 
-Each parent has their own user profile and rating history. Recommendations are fully independent — different users can have different taste profiles against the same catalog.
+After reading, tally your engagement signals: log completed sessions with `read`, re-read demands with `reread`, and abandoned attempts with `false-start`. Star ratings are a separate, optional layer. All four signals combine into a preference score that drives future recommendations.
+
+Each parent has their own user profile and engagement history. Recommendations are fully independent — different users can have different taste profiles against the same catalog.
 
 ---
 
@@ -203,6 +205,26 @@ Lists every copy in the Sno-Isle system with branch name, collection, call numbe
 
 ---
 
+### `./library sync-checkouts`
+
+Pulls your currently checked-out books from Sno-Isle and marks them in the local database. Run this before `recommend` to ensure the recommender excludes books already sitting on your shelf.
+
+```bash
+./library sync-checkouts
+./library --user madeleine sync-checkouts
+```
+
+Uses credentials from `.env`. Books are matched to the local catalog by `metadata_id`; any not found are reported but do not cause an error. The `currently_checked_out` flag is reset on every sync, so running it again after returning books will un-flag them.
+
+**Typical pre-trip workflow:**
+```bash
+./library sync-checkouts     # mark what we already have
+./library recommend          # get fresh picks
+./library hold <id>          # place holds
+```
+
+---
+
 ### `./library my-account`
 
 Logs into Sno-Isle and shows current holds and checked-out books for the active user.
@@ -216,11 +238,38 @@ Shows:
 - **Holds** — title, status, queue position, pickup branch, pickup-by / expiry dates
 - **Checkouts** — local DB id, title, due date, overdue status, renewable flag, your rating
 
-The local DB id is looked up first by matching the BiblioCommons `metadata_id`, then by title + author as a fallback (handles cases where the checkout API returns a different metadata_id format than the scraper stored). Books genuinely absent from the local catalog show `?` — re-run the scraper to pick them up. Use the id to rate directly from this view:
+The local DB id is looked up first by matching the BiblioCommons `metadata_id`, then by title + author as a fallback (handles cases where the checkout API returns a different metadata_id format than the scraper stored). Books genuinely absent from the local catalog show `?` — re-run the scraper to pick them up.
+
+---
+
+### `./library export-account-csv` / `./library import-ratings-csv`
+
+The primary workflow for rating an entire batch of checked-out books at once. Replaces typing `rate-book` one book at a time.
 
 ```bash
-./library --user heiki rate-book <id> <score>
+# 1. Export currently checked-out books to a CSV
+./library export-account-csv                       # writes ratings_export_YYYY-MM-DD.csv
+./library export-account-csv myratings.csv         # custom path
+
+# 2. Open the CSV in any spreadsheet, fill in the columns you want, save
+#    Columns: metadata_id (key — don't edit), title, author, rating, times_read,
+#             reread_demands, false_starts
+
+# 3. Apply the filled-in data
+./library import-ratings-csv ratings_export_2025-06-01.csv
+./library --user madeleine import-ratings-csv myratings.csv
 ```
+
+**Export behavior:**
+- Fetches live checkouts from Sno-Isle (same credentials as `my-account`)
+- Any checked-out books not yet in the local catalog are auto-added before writing
+- Pre-fills existing ratings from the local DB — already-logged values appear in the CSV so you can review and edit them
+
+**Import behavior:**
+- Books matched by `metadata_id` first, then title + author as fallback
+- Only non-empty cells are written — blank cells preserve whatever was already stored
+- Values are SET, not incremented: `times_read=5` means "5 total reads", not "add 5 more"
+- Any row whose book can't be found in the local catalog is reported and skipped
 
 ---
 
@@ -257,15 +306,50 @@ Prompts you to rate all checked-out unrated books for the active user.
 
 Decimal values are accepted (e.g., `3.5`). Press `s` to skip a book.
 
+The star rating is one of four engagement signals. For richer data, also log `read`, `reread`, and `false-start` events as they happen during a session.
+
 ---
 
 ### `./library rate-book`
 
-Rate a book directly without going through the checkout flow. Useful for seeding ratings on books you've already read.
+Rate a single book directly — no checkout flow needed. Useful for one-off corrections or seeding ratings on books you've already read. For rating a whole batch, use `export-account-csv` / `import-ratings-csv` instead.
 
 ```bash
 ./library rate-book              # interactive: search → pick → rate, repeat
 ./library rate-book <id> <score> # one-liner
+```
+
+---
+
+### `./library read <id>`
+
+Logs a completed reading session for a book. Call it once each time a book gets read cover-to-cover — whether on that library trip or re-read from a previous one.
+
+```bash
+./library read 42
+./library --user heiki read 42
+```
+
+---
+
+### `./library reread <id>`
+
+Logs a re-read demand — Heiki asked for the book again before it was even put down. This is the strongest positive engagement signal in the recommender.
+
+```bash
+./library reread 42
+./library --user heiki reread 42
+```
+
+---
+
+### `./library false-start <id>`
+
+Logs a false start — the book was opened but not finished. A soft negative signal. More false starts against a book will gently push it down in future recommendations.
+
+```bash
+./library false-start 42
+./library --user heiki false-start 42
 ```
 
 ---
@@ -349,12 +433,17 @@ All database reads and writes. Uses Python's built-in `sqlite3`. No ORM. All per
 | `add_checkout(book_id, user)` | Creates a checkout record for this user. |
 | `record_rating(checkout_id, rating)` | Saves a rating; user is inferred from the checkout record. |
 | `rate_book_direct(book_id, rating, user)` | Creates a completed checkout + rating in one step. |
+| `log_read(book_id, user)` | Increments `times_read` for a completed reading session. |
+| `log_reread_demand(book_id, user)` | Increments `reread_demands`. |
+| `log_false_start(book_id, user)` | Increments `false_starts`. |
 | `search_books(query, user, title, author)` | Search with optional field-specific filters. |
 | `get_book_ids_by_metadata(metadata_ids)` | Returns `{metadata_id: book_id}` for a list of BiblioCommons bib IDs. |
 | `get_book_ids_by_title_author(books)` | Fallback lookup returning `{(title, author): book_id}` for books not matched by metadata_id. |
-| `get_ratings_by_book_ids(book_ids, user)` | Returns `{book_id: avg_rating}` for the given book ids and user. |
+| `get_ratings_by_book_ids(book_ids, user)` | Returns `{book_id: {avg_rating, times_read, reread_demands, false_starts}}` for the given book ids and user. |
+| `sync_currently_checked_out(book_ids, user)` | Sets `currently_checked_out=1` for the given book ids, 0 for all others. Called by `sync-checkouts`. |
 | `export_ratings(user)` | Returns all rating data for a user as a serialisable dict. |
 | `import_ratings(data, user)` | Restores ratings from an export, matching books by title + author. |
+| `upsert_ratings_partial(user, book_id, **fields)` | SET-semantics upsert; only updates columns explicitly passed. Used by `import-ratings-csv`. |
 
 **Database schema:**
 
@@ -386,10 +475,14 @@ checkouts (
 )
 
 user_ratings (
-    user                TEXT,                 -- user profile name
-    book_id             INTEGER,
-    avg_rating          REAL,                 -- average engagement rating for this user
-    times_checked_out   INTEGER,              -- how many times this user checked it out
+    user                    TEXT,             -- user profile name
+    book_id                 INTEGER,
+    avg_rating              REAL,             -- average star rating for this user
+    times_checked_out       INTEGER,          -- library checkouts by this user
+    times_read              INTEGER,          -- completed reading sessions
+    reread_demands          INTEGER,          -- "again!" requests
+    false_starts            INTEGER,          -- started but not finished
+    currently_checked_out   INTEGER,          -- 1 if on our shelf right now (set by sync-checkouts)
     PRIMARY KEY (user, book_id)
 )
 ```
@@ -400,10 +493,24 @@ Core recommendation engine using TF-IDF and cosine similarity from scikit-learn.
 
 **Scoring:**
 1. TF-IDF matrix built from all books (unigrams + bigrams, 5,000 features max) — text includes title, author, description, subject, genre, and age_range
-2. Preference profile = mean TF-IDF vector of books rated ≥ 4 stars by the active user; falls back to mean of all checked-out books; falls back to zero vector (popularity-only) if no history
+2. Preference profile = engagement-weighted TF-IDF centroid of any book with a composite preference score > 0; falls back to mean of all checked-out books; falls back to zero vector (popularity-only) if no history
 3. Content score = cosine similarity to preference profile
 4. Popularity score = library checkout count normalized to 0–1
-5. Final score = `0.6 × content + 0.4 × popularity`
+5. Familiarity penalty = `times_checked_out` normalized 0–1
+6. Final score = `0.6 × content + 0.4 × popularity − 0.25 × familiarity`
+
+Books with `currently_checked_out = 1` (set by `sync-checkouts`) are hard-excluded from candidates entirely. Books previously checked out but returned are penalized by up to −0.25 but remain eligible for recommendation.
+
+**Composite preference score** (used to identify and weight liked books):
+
+| Signal | Weight | Notes |
+|--------|--------|-------|
+| `avg_rating` (normalized 0–1) | +0.30 | Adult subjective quality |
+| `reread_demands` (normalized 0–1) | +0.40 | Strongest engagement signal |
+| `times_read` (normalized 0–1) | +0.20 | Completed sessions |
+| `false_starts` (normalized 0–1) | −0.10 | Soft negative — disengagement |
+
+Each signal is normalized independently to 0–1 before weighting, so a book with 5 re-read demands and no rating still seeds the profile.
 
 Experimental picks are selected by highest `content − popularity` gap (similar to liked books but rarely checked out). Hidden gems are the three lowest absolute checkout counts across the whole catalog.
 

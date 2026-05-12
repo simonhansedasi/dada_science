@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-catalog_scraper.py — Sno-Isle catalog scraper (parallel, change-only writes)
+catalog_scraper.py — Sno-Isle children's catalog scraper
 
-Probes all 36 query prefixes simultaneously, then fetches every page in one
-shared thread pool. A single writer thread drains results from a queue so
-fetch threads never block on the DB. Only writes rows that have changed.
+Discovery strategy: subject-based enumeration of juvenile books (much smaller
+and more targeted than the old a-z keyword sweep over the full 190k catalog).
+Unique key is metadata_id — BiblioCommons' authoritative bib identifier — so
+series volumes with identical titles but different subtitles are stored separately.
 
 Usage:
     python catalog_scraper.py                  # full run
-    python catalog_scraper.py --max-pages 5    # quick test (~18k books)
+    python catalog_scraper.py --max-pages 5    # quick test
 """
 
 import argparse
@@ -23,23 +24,39 @@ from tqdm import tqdm
 
 import db
 
-BASE_URL  = "https://gateway.bibliocommons.com/v2/libraries/sno-isle/bibs/search"
-PER_PAGE  = 100   # BiblioCommons max
-WORKERS   = 30    # parallel fetch threads
-QUERIES   = list("abcdefghijklmnopqrstuvwxyz0123456789")
+BASE_URL = "https://gateway.bibliocommons.com/v2/libraries/sno-isle/bibs/search"
+PER_PAGE = 100
+WORKERS  = 20
 
-# Fields we compare to decide whether a row needs updating
+# Subject queries that together cover the juvenile catalog.
+# Deduplicated by metadata_id so overlaps are free.
+SUBJECTS = [
+    "picture books",
+    "juvenile fiction",
+    "board books",
+    "easy readers",
+    "beginning readers",
+    "fairy tales",
+    "folklore",
+    "nursery rhymes",
+    "alphabet books",
+    "counting books",
+    "concept books",
+    "toy and movable books",
+]
+
 COMPARE_FIELDS = (
+    "title", "subtitle", "author", "series_name",
     "description", "isbn", "genre", "subject",
-    "age_range", "library_checkout_count", "metadata_id",
+    "age_range", "library_checkout_count",
 )
 
-_seen: set       = set()
-_seen_lock       = threading.Lock()
-_SENTINEL        = object()   # signals writer to stop
+_seen: set    = set()
+_seen_lock    = threading.Lock()
+_SENTINEL     = object()
 
 
-# ── Network ──────────────────────────────────────────────────────────────────
+# ── Network ───────────────────────────────────────────────────────────────────
 
 def _session():
     s = requests.Session()
@@ -51,13 +68,14 @@ def _session():
     return s
 
 
-def _fetch(session, query, page):
+def _fetch(session, subject, page):
     r = session.get(BASE_URL, params={
-        "query":      query,
-        "searchType": "keyword",
+        "query":      subject,
+        "searchType": "subject",
         "limit":      PER_PAGE,
         "page":       page,
-        "f_FORMAT":   "BK",          # physical books only
+        "f_FORMAT":   "BK",
+        "f_AUDIENCE": "juvenile",
     }, timeout=20)
     r.raise_for_status()
     return r.json()
@@ -66,7 +84,6 @@ def _fetch(session, query, page):
 # ── Extraction ────────────────────────────────────────────────────────────────
 
 def _extract(data):
-    """Pull books out of a raw API response, deduplicating by bib id."""
     books = []
     for bib_id, bib in data.get("entities", {}).get("bibs", {}).items():
         with _seen_lock:
@@ -79,17 +96,19 @@ def _extract(data):
 
         def s(v): return (v or "").strip()
 
-        authors  = info.get("authors")  or []
-        isbns    = info.get("isbns")    or []
+        authors  = info.get("authors") or []
+        isbns    = info.get("isbns")   or []
         subjects = (
             (info.get("subjectHeadings")          or []) +
             (info.get("compositeSubjectHeadings") or [])
         )
+        series_list = info.get("series") or []
+        series_name = series_list[0].get("name", "") if series_list else ""
 
         copies = avail.get("totalCopies")
         try:
             checkout_count = int(copies) if copies is not None else 0
-            if checkout_count >= 999999:   # BiblioCommons sentinel — not a real count
+            if checkout_count >= 999999:
                 checkout_count = 0
         except (TypeError, ValueError):
             checkout_count = 0
@@ -99,15 +118,17 @@ def _extract(data):
             continue
 
         books.append({
+            "metadata_id":            bib_id,
             "title":                  title,
+            "subtitle":               s(info.get("subtitle")),
             "author":                 s(authors[0]) if authors else "",
+            "series_name":            s(series_name),
             "description":            s(info.get("description")),
             "isbn":                   s(isbns[0]) if isbns else "",
             "genre":                  "; ".join(info.get("genreForm") or []),
             "subject":                "; ".join(dict.fromkeys(subjects)),
             "age_range":              "; ".join(info.get("audiences") or []),
             "library_checkout_count": checkout_count,
-            "metadata_id":            bib_id,
         })
     return books
 
@@ -115,10 +136,6 @@ def _extract(data):
 # ── Database writer (single thread) ──────────────────────────────────────────
 
 def _writer(q, pbar, bbar):
-    """
-    Drains the result queue and writes to SQLite on one thread —
-    no lock contention, one connection for the whole run.
-    """
     inserted = updated = skipped = errors = 0
     failed_pages = []
     conn = sqlite3.connect(db.DB_PATH)
@@ -129,10 +146,10 @@ def _writer(q, pbar, bbar):
         if item is _SENTINEL:
             break
 
-        query, page, books, err = item
+        subject, page, books, err = item
         if err:
             errors += 1
-            failed_pages.append((query, page, err))
+            failed_pages.append((subject, page, err))
             pbar.update(1)
             continue
 
@@ -140,23 +157,17 @@ def _writer(q, pbar, bbar):
             pbar.update(1)
             continue
 
-        # Batch-fetch existing rows for all metadata_ids on this page
-        meta_ids = [b["metadata_id"] for b in books if b.get("metadata_id")]
-        if meta_ids:
-            ph = ",".join("?" * len(meta_ids))
-            rows = conn.execute(
-                f"SELECT metadata_id, {', '.join(COMPARE_FIELDS)} "
-                f"FROM books WHERE metadata_id IN ({ph})",
-                meta_ids,
-            ).fetchall()
-            existing = {r["metadata_id"]: r for r in rows}
-        else:
-            existing = {}
+        meta_ids = [b["metadata_id"] for b in books]
+        ph = ",".join("?" * len(meta_ids))
+        rows = conn.execute(
+            f"SELECT metadata_id, {', '.join(COMPARE_FIELDS)} "
+            f"FROM books WHERE metadata_id IN ({ph})",
+            meta_ids,
+        ).fetchall()
+        existing = {r["metadata_id"]: r for r in rows}
 
         for book in books:
-            mid = book.get("metadata_id")
-            if not mid:
-                continue
+            mid = book["metadata_id"]
 
             if mid in existing:
                 row = existing[mid]
@@ -174,12 +185,11 @@ def _writer(q, pbar, bbar):
             cols   = list(book.keys())
             ph2    = ", ".join(["?"] * len(cols))
             update = ", ".join(
-                f"{c} = excluded.{c}" for c in cols
-                if c not in ("title", "author")
+                f"{c} = excluded.{c}" for c in cols if c != "metadata_id"
             )
             conn.execute(
                 f"INSERT INTO books ({', '.join(cols)}) VALUES ({ph2}) "
-                f"ON CONFLICT(title, author) DO UPDATE SET {update}",
+                f"ON CONFLICT(metadata_id) DO UPDATE SET {update}",
                 list(book.values()),
             )
 
@@ -196,46 +206,46 @@ def _writer(q, pbar, bbar):
 
 # ── Fetch workers ─────────────────────────────────────────────────────────────
 
-def _fetch_page(query, page):
+def _fetch_page(subject, page):
     sess = _session()
     for attempt in range(5):
         try:
-            data  = _fetch(sess, query, page)
+            data  = _fetch(sess, subject, page)
             books = _extract(data)
-            return query, page, books, None
-        except requests.exceptions.Timeout as e:
+            return subject, page, books, None
+        except requests.exceptions.Timeout:
             wait = 2 ** attempt
-            tqdm.write(f"  [{query} p{page}] Timeout — retrying in {wait}s")
+            tqdm.write(f"  [{subject!r} p{page}] Timeout — retrying in {wait}s")
             time.sleep(wait)
         except requests.HTTPError as e:
             status = e.response.status_code if e.response is not None else "?"
             if status in (429, 503) or (isinstance(status, int) and status >= 500):
-                wait = 2 ** attempt          # 1s, 2s, 4s, 8s, 16s
-                tqdm.write(f"  [{query} p{page}] HTTP {status} — retrying in {wait}s")
+                wait = 2 ** attempt
+                tqdm.write(f"  [{subject!r} p{page}] HTTP {status} — retrying in {wait}s")
                 time.sleep(wait)
             else:
-                tqdm.write(f"  [{query} p{page}] HTTP {status} — skipping")
-                return query, page, [], str(e)
+                tqdm.write(f"  [{subject!r} p{page}] HTTP {status} — skipping")
+                return subject, page, [], str(e)
         except Exception as e:
-            tqdm.write(f"  [{query} p{page}] {type(e).__name__}: {e} — skipping")
-            return query, page, [], str(e)
-    tqdm.write(f"  [{query} p{page}] gave up after 5 attempts")
-    return query, page, [], "max retries"
+            tqdm.write(f"  [{subject!r} p{page}] {type(e).__name__}: {e} — skipping")
+            return subject, page, [], str(e)
+    tqdm.write(f"  [{subject!r} p{page}] gave up after 5 attempts")
+    return subject, page, [], "max retries"
 
 
-def _probe(query, max_pages):
-    """Fetch page 1; return (query, total_pages, page1_books)."""
+def _probe(subject, max_pages):
     sess = _session()
     try:
-        data       = _fetch(sess, query, 1)
+        data       = _fetch(sess, subject, 1)
         pagination = data.get("catalogSearch", {}).get("pagination", {})
         total      = pagination.get("pages", 1)
+        count      = pagination.get("count", 0)
         if max_pages:
             total = min(total, max_pages)
-        return query, total, _extract(data), None
+        return subject, total, count, _extract(data), None
     except Exception as e:
-        tqdm.write(f"  [{query} probe] {type(e).__name__}: {e}")
-        return query, 0, [], str(e)
+        tqdm.write(f"  [{subject!r} probe] {type(e).__name__}: {e}")
+        return subject, 0, 0, [], str(e)
 
 
 # ── Orchestration ─────────────────────────────────────────────────────────────
@@ -243,25 +253,24 @@ def _probe(query, max_pages):
 def scrape_all(max_pages=None):
     db.init_db()
 
-    # ── Phase 1: probe all query letters simultaneously ────────────────
-    work = []           # (query, page) pairs for pages 2..N
-    page1_results = []  # (query, page, books, err) from page-1 probes
+    work = []
+    page1_results = []
 
-    with tqdm(total=len(QUERIES), desc="Probing ", unit="prefix") as probe_bar:
-        with ThreadPoolExecutor(max_workers=len(QUERIES)) as ex:
-            futs = {ex.submit(_probe, q, max_pages): q for q in QUERIES}
+    tqdm.write(f"Probing {len(SUBJECTS)} subject queries...\n")
+    with tqdm(total=len(SUBJECTS), desc="Probing ", unit="subject") as probe_bar:
+        with ThreadPoolExecutor(max_workers=len(SUBJECTS)) as ex:
+            futs = {ex.submit(_probe, s, max_pages): s for s in SUBJECTS}
             for fut in as_completed(futs):
-                q, total, books, err = fut.result()
-                page1_results.append((q, 1, books, err))
+                subj, total, count, books, err = fut.result()
+                page1_results.append((subj, 1, books, err))
                 for p in range(2, total + 1):
-                    work.append((q, p))
-                probe_bar.set_postfix(pages=f"{len(QUERIES) + len(work):,}")
+                    work.append((subj, p))
+                probe_bar.set_postfix(subject=f"{subj!r}", books=f"{count:,}")
                 probe_bar.update(1)
 
-    total_pages = len(QUERIES) + len(work)
-    tqdm.write(f"  {total_pages:,} total pages — fetching {len(work):,} more\n")
+    total_pages = len(SUBJECTS) + len(work)
+    tqdm.write(f"\n  {total_pages:,} total pages — fetching {len(work):,} more\n")
 
-    # ── Phase 2: fetch pool + writer thread ────────────────────────────
     result_q = queue.Queue(maxsize=WORKERS * 2)
 
     with tqdm(total=total_pages, desc="Pages   ", unit="pg") as pbar, \
@@ -282,7 +291,7 @@ def scrape_all(max_pages=None):
             result_q.put(item)
 
         with ThreadPoolExecutor(max_workers=WORKERS) as ex:
-            futs = {ex.submit(_fetch_page, q, p): (q, p) for q, p in work}
+            futs = {ex.submit(_fetch_page, s, p): (s, p) for s, p in work}
             for fut in as_completed(futs):
                 result_q.put(fut.result())
 
@@ -290,7 +299,7 @@ def scrape_all(max_pages=None):
         writer_thread.join()
 
     r = writer_result
-    failed = r.get('failed', [])
+    failed = r.get("failed", [])
     print("\n" + "─" * 40)
     print(f"Inserted:    {r.get('inserted', 0):,}")
     print(f"Updated:     {r.get('updated',  0):,}")
@@ -304,24 +313,80 @@ def scrape_all(max_pages=None):
         log_path = pathlib.Path(db.DB_PATH).with_name("failed_pages.csv")
         with log_path.open("w", newline="") as f:
             w = csv.writer(f)
-            w.writerow(["query", "page", "error"])
+            w.writerow(["subject", "page", "error"])
             w.writerows(failed)
-        print(f"\nFailed pages written to: {log_path}")
-        print(f"{'query':>6}  {'page':>6}  error")
-        print(f"{'─'*6}  {'─'*6}  {'─'*40}")
-        for q, p, e in sorted(failed):
-            print(f"{q:>6}  {p:>6}  {e[:60]}")
+        print(f"\nFailed pages: {log_path}")
+
+
+# ── Live lookup (used by add-book command) ────────────────────────────────────
+
+def search_bibliocommons(query: str, search_type: str = "title", limit: int = 20) -> list:
+    """Search BiblioCommons live. search_type: 'title' | 'author' | 'series' | 'keyword'"""
+    sess = _session()
+    r = sess.get(BASE_URL, params={
+        "query":      query,
+        "searchType": search_type,
+        "limit":      limit,
+        "page":       1,
+        "f_FORMAT":   "BK",
+    }, timeout=20)
+    r.raise_for_status()
+    data = r.json()
+
+    books = []
+    for bib_id, bib in data.get("entities", {}).get("bibs", {}).items():
+        info        = bib.get("briefInfo",   {})
+        avail       = bib.get("availability", {})
+        authors     = info.get("authors") or []
+        isbns       = info.get("isbns")   or []
+        subjects    = (
+            (info.get("subjectHeadings")          or []) +
+            (info.get("compositeSubjectHeadings") or [])
+        )
+        series_list = info.get("series") or []
+        series_name = series_list[0].get("name", "") if series_list else ""
+
+        copies = avail.get("totalCopies")
+        try:
+            checkout_count = int(copies) if copies is not None else 0
+            if checkout_count >= 999999:
+                checkout_count = 0
+        except (TypeError, ValueError):
+            checkout_count = 0
+
+        def s(v): return (v or "").strip()
+
+        title = s(info.get("title"))
+        if not title:
+            continue
+
+        books.append({
+            "metadata_id":            bib_id,
+            "title":                  title,
+            "subtitle":               s(info.get("subtitle")),
+            "author":                 s(authors[0]) if authors else "",
+            "series_name":            s(series_name),
+            "description":            s(info.get("description")),
+            "isbn":                   s(isbns[0]) if isbns else "",
+            "genre":                  "; ".join(info.get("genreForm") or []),
+            "subject":                "; ".join(dict.fromkeys(subjects)),
+            "age_range":              "; ".join(info.get("audiences") or []),
+            "library_checkout_count": checkout_count,
+        })
+
+    books.sort(key=lambda b: b["library_checkout_count"], reverse=True)
+    return books
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Scrape Sno-Isle physical-book catalog into library.db"
+        description="Scrape Sno-Isle juvenile catalog into library.db"
     )
     parser.add_argument(
         "--max-pages", type=int, default=None,
-        help="Max pages per query letter — omit for full catalog",
+        help="Max pages per subject query — omit for full run",
     )
     args = parser.parse_args()
     print(f"Target: {db.DB_PATH}\n")

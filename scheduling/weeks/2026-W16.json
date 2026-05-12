@@ -1,0 +1,158 @@
+{
+  "week": "2026-W16",
+  "start": "2026-04-13",
+  "end": "2026-04-19",
+  "days": {
+    "2026-04-13": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "m13a001",
+          "time": "09:30",
+          "title": "Mission Monday — errand run + color hunt",
+          "notes": "Frame the day as a mission. Before heading out, draw or print a simple 5-color checklist (red, yellow, blue, green, orange). Heiki carries the mission clipboard and spots each color during errands. When all 5 are found, mission complete — reward with a treat (bakery stop, cookie from the store, or ice cream bar). Keep errands to 2-3 stops max. Works rain or shine.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "69475gi8d13h3778gaq2b6qi3s"
+        }
+      ],
+      "gcal_nap_event_id": "hgqtcqf46h0h2fiqoc623c395o"
+    },
+    "2026-04-14": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "t14a001",
+          "time": "10:00",
+          "title": "Library trip",
+          "notes": "Standard Library Tuesday. Children's section — pick 3-5 new books, return old ones. Check the front desk for any storytime or drop-in programs running this week.",
+          "location": "Everett Public Library, 2702 Hoyt Ave, Everett, WA 98201",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "ct7hed2ipvutbdrbct7qbt4984"
+        }
+      ],
+      "gcal_nap_event_id": "8jmb6n8i2l3rhp3tlihife0fgc"
+    },
+    "2026-04-15": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "w15a001",
+          "time": "10:00",
+          "title": "Color sorter + rainbow collage",
+          "notes": "Start with the color sorter. Extend the activity: gather sorted colored items (crayons, pom poms, blocks, dried pasta, fabric scraps) and arrange them in ROYGBIV rainbow order on paper. Glue down or just arrange and photograph. No special supplies needed beyond what's on hand.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "vipeae2c6kqpdbcqi7avth4tn0"
+        },
+        {
+          "id": "3d41d64a",
+          "time": "17:00",
+          "title": "Recycling",
+          "notes": "",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "efi33ems4ukqjktmj4ta0tlm7k_20260416T030000Z",
+          "calendar": "woses21@gmail.com",
+          "all_day": false
+        },
+        {
+          "id": "33184524",
+          "time": "17:00",
+          "title": "Trash",
+          "notes": "",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "scon2ae1ofbp2pam3sicdc6kts_20260416T030000Z",
+          "calendar": "woses21@gmail.com",
+          "all_day": false
+        }
+      ],
+      "gcal_nap_event_id": "ufk9qdjkm9cj1hjb7c870te410"
+    },
+    "2026-04-16": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "h16a001",
+          "time": "10:00",
+          "title": "Little Pandas Play Cafe — new spot",
+          "notes": "Fun new play cafe. Hours 8am–8pm, no reservation needed for walk-ins (book ahead if going before noon). $14 admission per child for play area (no fee to just sit in cafe area). Nine developmental play stations — fine and gross motor, safe and clean, calmer than typical play venues. Parents have clear sightlines from every corner. Cafe menu: specialty coffee, Italian sodas, falooda (South Asian specialty drink w/ ice cream + chia + jelly), croissants, cinnamon rolls, mini pancakes, artichoke-spinach balls. Free parking in mall lot. Fallback: Café Aroma if preferred.",
+          "location": "Little Pandas Play Cafe, 210 SW Everett Mall Way, Everett, WA 98204",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "kkfahjk6pgauf943g6ce3um94g"
+        }
+      ],
+      "gcal_nap_event_id": "igd2oddgqir3sslvhcmk7fae2o"
+    },
+    "2026-04-17": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "f17a001",
+          "time": "09:30",
+          "title": "Spencer Island — wetland wildlife walk",
+          "notes": "Access via Langus Riverfront Park, 400 Smith Island Rd, Everett WA. Free gravel parking. Restroom at trailhead. Paved path leads out to Spencer Island via the 1914 Jackknife bascule bridge (historic draw bridge — a destination in itself). Loop the dike trail on the island. Zero elevation gain. April = peak spring birding: herons, bald eagles, hawks, ducks, mergansers, Canada geese, red-winged blackbirds singing from cattails, possible river otters. BRING: rain layer (April is wet), sturdy shoes for gravel + muddy dike sections, water + snacks, binoculars if you have them. Stroller OK on paved approach and main dike — some sections are gravel/grass. DO NOT bring dogs onto south island (county park rules). Full loop ~3 miles but turn back whenever Heiki is done — half mile to the bridge is already the payoff.",
+          "location": "Langus Riverfront Park, 400 Smith Island Rd, Everett, WA 98204",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "1cs2bnqq09gi0d0ama1iqb1q34"
+        }
+      ],
+      "gcal_nap_event_id": "0s0evudovntag4ldbsgggac5hg"
+    },
+    "2026-04-18": {
+      "nap_override": null,
+      "activities": [
+        {
+          "id": "bf0fb15e",
+          "time": "04:30",
+          "title": "Murflea medicine",
+          "notes": "",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "c9hj0eb26dh3abb374p3ab9k74r32bb1cdh6ab9lcoq38c1h64oj4d316o_20260418T143000Z",
+          "calendar": "woses21@gmail.com",
+          "all_day": false
+        },
+        {
+          "id": "29240065",
+          "time": "09:00",
+          "title": "Mad mage?",
+          "notes": "",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "coqj0eb270rjebb66ksmab9k70o36b9p6ss32b9i65h30p1j60o6adb6c4",
+          "calendar": "vitruviansandwich@gmail.com",
+          "all_day": false
+        },
+        {
+          "id": "a6046112",
+          "time": "17:00",
+          "title": "Desna medine",
+          "notes": "",
+          "location": "",
+          "tags": [],
+          "gcal_source": true,
+          "gcal_id": "cks38eb4cgpm4b9gckr3cb9k6ti3ibb174rjeb9kcos38dr470qm6db4cg_20260419T030000Z",
+          "calendar": "woses21@gmail.com",
+          "all_day": false
+        }
+      ],
+      "gcal_nap_event_id": "5n5kju3qaei1ko46bq6cnisp94"
+    }
+  }
+}

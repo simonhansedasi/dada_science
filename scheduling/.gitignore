@@ -1,0 +1,13 @@
+# Credentials
+credentials/token.json
+credentials/client_secret.json
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Claude Code
+CLAUDE.md

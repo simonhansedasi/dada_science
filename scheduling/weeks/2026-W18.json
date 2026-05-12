@@ -1,0 +1,83 @@
+{
+  "week": "2026-W18",
+  "start": "2026-04-27",
+  "end": "2026-05-03",
+  "days": {
+    "2026-04-27": {
+      "activities": [
+        {
+          "id": "m27a1",
+          "time": "09:00",
+          "title": "Errands Monday",
+          "notes": "Morning errands run",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "f8c5nm511q6a5j5oalhsd7vdro"
+        }
+      ]
+    },
+    "2026-04-28": {
+      "activities": [
+        {
+          "id": "t28a1",
+          "time": "10:00",
+          "title": "Library Tuesday",
+          "notes": "Storytime or browse — return any holds",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "dvrkdl4ggiemmvgaig2qd2la2c"
+        }
+      ]
+    },
+    "2026-04-29": {
+      "activities": [
+        {
+          "id": "w29a1",
+          "time": "10:00",
+          "title": "Kelsey Creek Farm — Oma Wednesday",
+          "notes": "Free, no reservation needed. Animals 9am-3pm. Bring snacks + hand sanitizer, stroller ok. Wear closed-toe shoes — ground can be muddy. No feeding animals.",
+          "location": "410 130th Pl SE, Bellevue, WA 98005",
+          "tags": [
+            "🧒",
+            "👴"
+          ],
+          "gcal_event_id": "771g5ecf4fhfmta7vuli2qmtk4"
+        }
+      ]
+    },
+    "2026-04-30": {
+      "activities": [
+        {
+          "id": "th30a1",
+          "time": "09:30",
+          "title": "Kaffeehaus de Châtillon — Café Thursday",
+          "notes": "Viennese coffee house — only Traditional Viennese Kaffee, no substitutions. Try the Melange + Sachertorte. Open 8am-3pm Thu. No outside food or drink allowed (including water bottles or toddler snacks — feed Heiki before you go or order from the menu). Located at 16108 Ash Way, Lynnwood.",
+          "location": "16108 Ash Way Ste 101, Lynnwood, WA 98087",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "irissfou2uikplasvmo7o7kef4"
+        }
+      ]
+    },
+    "2026-05-01": {
+      "activities": [
+        {
+          "id": "f1a1",
+          "time": "10:00",
+          "title": "Mukilteo Lighthouse Park — Adventure Friday",
+          "notes": "0.6 mi flat paved path along the water — fully stroller-friendly. Beach access, playground, and front-row ferry watching (Mukilteo-Clinton route). Historic 1906 lighthouse on grounds. Ivar's Fish Bar next door for lunch. ~15 min from Lynnwood. Park open 6am-10pm.",
+          "location": "609 Front St, Mukilteo, WA 98275",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "k32fkt76hdrqvglbtqbmko73do"
+        }
+      ]
+    }
+  }
+}

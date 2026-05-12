@@ -1,0 +1,93 @@
+{
+  "week": "2026-W17",
+  "start": "2026-04-20",
+  "end": "2026-04-26",
+  "days": {
+    "2026-04-20": {
+      "activities": [
+        {
+          "id": "m20a1",
+          "time": "09:00",
+          "title": "Dry cleaning pickup",
+          "notes": "Morning errands run",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "4ognvk6ph82u113lra4un64brc"
+        },
+        {
+          "id": "m20a2",
+          "time": "09:30",
+          "title": "Fertilizer + root beer run",
+          "notes": "Grab fertilizer and root beer if available",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "vfehdpgb153du1phgp5vi0npg4"
+        }
+      ]
+    },
+    "2026-04-21": {
+      "activities": [
+        {
+          "id": "t21a1",
+          "time": "10:00",
+          "title": "Library Tuesday",
+          "notes": "Storytime or browse — return any holds",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "h8p7m749fpeqpetj4jvs687gqo"
+        }
+      ]
+    },
+    "2026-04-22": {
+      "activities": [
+        {
+          "id": "w22a1",
+          "time": "10:00",
+          "title": "Banana bread — Crafting Wednesday",
+          "notes": "Let Heiki help mash bananas, pour, stir",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "jgkqe03u27bf65ajlndb4mhd68"
+        }
+      ]
+    },
+    "2026-04-23": {
+      "activities": [
+        {
+          "id": "th23a1",
+          "time": "10:00",
+          "title": "Panda play place",
+          "notes": "Café Thursday — check open play hours before leaving",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "pium2m0o62l6ekltp901h2s028"
+        }
+      ]
+    },
+    "2026-04-24": {
+      "activities": [
+        {
+          "id": "f24a1",
+          "time": "10:00",
+          "title": "Kelsey Creek Farm — Adventure Friday",
+          "notes": "Free, no reservation needed. Animals 9am-3pm. Bring snacks + hand sanitizer, stroller ok. Wear closed-toe shoes — ground can be muddy. No feeding animals.",
+          "location": "410 130th Pl SE, Bellevue, WA 98005",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "38lmspndol4f69hiq0cjrof17g"
+        }
+      ]
+    }
+  }
+}

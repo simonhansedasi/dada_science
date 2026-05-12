@@ -1,0 +1,82 @@
+{
+  "week": "2026-W20",
+  "start": "2026-05-11",
+  "end": "2026-05-17",
+  "days": {
+    "2026-05-11": {
+      "activities": [
+        {
+          "id": "m11a1",
+          "time": "09:30",
+          "title": "Mission Monday — Scriber Lake Scavenger Hunt",
+          "notes": "Mission: find 5 things together — a duck, a pinecone, a big rock, something yellow, a stick longer than your arm. Bring a bag for treasures. 1.1-mile flat loop trail around the lake, fully stroller-friendly. Ducks and geese on the water. Open dawn to dusk.",
+          "location": "5321 168th St SW, Lynnwood, WA 98037",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "t1uqstlg6utuo24kbhtefknam4"
+        }
+      ]
+    },
+    "2026-05-12": {
+      "activities": [
+        {
+          "id": "t12a1",
+          "time": "10:00",
+          "title": "Library Tuesday",
+          "notes": "Storytime or browse — return any holds.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "cd6oremu38qkl1qa1cc81doiqg"
+        }
+      ]
+    },
+    "2026-05-13": {
+      "activities": [
+        {
+          "id": "w13a1",
+          "time": "10:00",
+          "title": "Crafting Wednesday — Brownies with Heiki",
+          "notes": "Let Heiki stir, pour chocolate chips, lick the spoon. Set up the step stool at the counter. Have ingredients measured out in advance. Box mix recommended for reliable results. Cool on the rack together.",
+          "location": "",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "jdtk2iin4pqr3dusvvevhpb568"
+        }
+      ]
+    },
+    "2026-05-14": {
+      "activities": [
+        {
+          "id": "th14a1",
+          "time": "09:30",
+          "title": "Cafe Aroma — Cafe Thursday",
+          "notes": "Relaxed neighborhood cafe with eclectic seating (couches, easy chairs, tables) — good for wrangling a toddler. Pastries, cookies, baklava. Drive-through option if Heiki is fussy. Family-friendly. Open Mon-Thu 5:30am-6pm. About 20 min from Lynnwood via I-5.",
+          "location": "509 NE 165th St, Shoreline, WA 98155",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "fk25et6kal0jp200hnbtbfb2fo"
+        }
+      ]
+    },
+    "2026-05-15": {
+      "activities": [
+        {
+          "id": "f15a1",
+          "time": "10:00",
+          "title": "Jennings Memorial Park — Adventure Friday",
+          "notes": "51-acre former farm park in Marysville. Dinosaur playground with T-Rex ride and Stegosaurus climber, boardwalk across wetlands, fishing pond, master gardener demonstration garden. Clean restrooms in the red barn. Flat paths and boardwalk — stroller-friendly. About 35 min north of Lynnwood via I-5, Exit 199. Open dawn to dusk.",
+          "location": "6915 Armar Road, Marysville, WA 98270",
+          "tags": [
+            "🧒"
+          ],
+          "gcal_event_id": "tc8ejfkbiji02npdube10et380"
+        }
+      ]
+    }
+  }
+}

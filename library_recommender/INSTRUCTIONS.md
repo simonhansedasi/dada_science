@@ -48,48 +48,78 @@ All commands support `--user`. The default is whatever `LIBRARY_USER` is set to 
 ## Getting a catalog (first time only)
 
 ```bash
-# Full run — ~165,000 physical books, all ages (~45 min)
+# Full run — ~20-40k juvenile books, subject-targeted (~5-10 min)
 python catalog_scraper.py
 
-# Quick test first (~3,600 books)
+# Quick test first (~500 books)
 python catalog_scraper.py --max-pages 2
 ```
 
-Re-run anytime to refresh the catalog — ratings and checkout history are never overwritten. Books that haven't changed are skipped, so re-runs are fast. Read timeouts are retried up to 5 times before a page is abandoned; any abandoned pages are written to `failed_pages.csv`. Run again after a failed scrape to pick up any missed pages (already-scraped books will be skipped instantly).
+The scraper queries 12 children's subject categories (`picture books`, `juvenile fiction`, `board books`, `fairy tales`, etc.) and deduplicates by BiblioCommons bib ID. Overlapping subjects are free — a book appearing in multiple subjects is only stored once.
+
+Re-run anytime to refresh the catalog — ratings and checkout history are never overwritten. Books that haven't changed are skipped, so re-runs are fast. Any failed pages are written to `failed_pages.csv`; re-run to pick them up.
 
 The catalog is shared between all users. Only ratings and checkouts are per-user.
+
+### Adding a specific book not in the catalog
+
+If a book you want isn't in the local catalog (e.g. a very old bib record the subject sweep missed), add it directly from BiblioCommons:
+
+```bash
+./library add-book "The Lorax"                         # title search (default)
+./library add-book "Adam Raccoon" --type title         # find all volumes in a series
+./library add-book "Eric Carle" --type author          # by author
+```
+
+Shows matching results with checkout counts and any already-in-catalog flags. Enter a number, comma-separated list, or `all` to add.
 
 ---
 
 ## Cold start — seed your first ratings
 
-Before the recommender can personalize suggestions it needs a few ratings. Use `rate-book` to rate books you've already read without going through the checkout flow.
+Before the recommender can personalize suggestions it needs a few ratings. Use `export-account-csv` if you have books currently checked out, or `rate-book` to rate books you've already read without going through the checkout flow.
 
-**Interactive loop** — search for books and rate them one by one:
+**CSV workflow** (fastest for a batch):
 ```bash
-./library rate-book
-./library --user madeleine rate-book
+./library export-account-csv          # export current checkouts
+# fill in the CSV, then:
+./library import-ratings-csv ratings_export_YYYY-MM-DD.csv
 ```
-Type a title or author, pick from the results, give a score 1–5, repeat. Leave the search blank to finish.
 
-**One-liner** — if you know the ID already:
+**One-liner** — if you know the ID:
 ```bash
 ./library rate-book <id> <score>
 ./library rate-book 42 5
 ```
 
-Find IDs with `./library search`. Five or more ratings is enough for the recommender to start personalizing.
+**Interactive loop** — search and rate one by one:
+```bash
+./library rate-book
+```
+
+Find IDs with `./library search`. Five or more ratings (or any combination of reads/reread demands) is enough for the recommender to start personalizing.
 
 ---
 
 ## Daily use
 
+### Before every library trip — sync current checkouts
+
+The recommender can't know what's already on your shelf unless you tell it. Run this once before recommending:
+
+```bash
+./library sync-checkouts
+./library --user madeleine sync-checkouts   # if using multi-user
+```
+
+This logs into Sno-Isle, fetches your live checkout list, and marks those books so `recommend` skips them. Re-run after returning books to un-flag them.
+
+---
+
 ### Get recommendations
 ```bash
 ./library recommend
-./library --user heiki recommend --age juvenile   # children's books only
-./library recommend --age adult
-./library recommend --age teen
+./library --user heiki recommend
 ```
 Shows animated progress while thinking, then returns 10 books with bold IDs and quick-action hints on each card:
 - **5 Top matches** — best fit based on past ratings + popularity
@@ -98,12 +128,12 @@ Shows animated progress while thinking, then returns 10 books with bold IDs and 
 
 ### Recommend and hold all in one step
 ```bash
-./library --user heiki recommend --age juvenile --hold-all
+./library --user heiki recommend --hold-all
 ```
 Displays recommendations then immediately places holds on all of them. Uses `SNOISLE_BRANCH` from `.env` for pickup (Lynnwood = 18). Logs in once and places all holds in sequence.
 
 Skips two kinds of books with a warning:
-- No catalog ID → re-run the scraper
+- No catalog ID → use `./library add-book "title"` to find and add it
 - Non-`S121` metadata ID (e.g. `S980...`) → shared record from a partner library; Sno-Isle's API won't hold it. Place these on the website.
 
 ### Place a single hold
@@ -136,11 +166,28 @@ Logs into Sno-Isle and shows:
 - **Holds** — status, queue position, pickup branch, pickup-by date
 - **Checkouts** — local DB id, due date, renewable flag, your rating so far
 
-Use the id column to rate directly without searching:
-```bash
-./library --user heiki rate-book <id> <score>
-```
 Books that show `?` for id aren't in the local catalog yet — re-run the scraper. Uses the credentials for the active user from `.env`.
+
+### Rate a whole batch via CSV (primary rating workflow)
+
+```bash
+# 1. Export currently checked-out books
+./library export-account-csv          # writes ratings_export_YYYY-MM-DD.csv
+
+# 2. Open CSV in any spreadsheet, fill in: rating, times_read, reread_demands, false_starts
+#    Leave cells blank to skip them — blank = don't change what's already stored
+
+# 3. Apply the data
+./library import-ratings-csv ratings_export_2025-06-01.csv
+```
+
+Values are SET (not incremented). `times_read=5` stores 5 total — it doesn't add 5 to whatever was there.
+
+Rate a single book one-off:
+```bash
+./library rate-book <id> <score>
+./library rate-book              # interactive search loop
+```
 
 ### Place a hold at the library
 ```bash
@@ -160,12 +207,37 @@ Shows live copy availability, then logs into Sno-Isle using the active user's cr
 ```
 **This does not contact the library.** It only marks the book in your local database so it shows up in `./library rate` after you return it. Use `hold` to actually interact with Sno-Isle.
 
-### Rate books (after returning them)
+### Log engagement signals (during or after reading)
+
+There are four signals you can tally for any book. Log them as they happen — you don't have to wait until return day.
+
+#### `read` — finished the book
+```bash
+./library read <id>
+./library --user heiki read 42
+```
+Call once per completed reading session. If Heiki gets the same book read three times across a checkout, run it three times.
+
+#### `reread` — "again!"
+```bash
+./library reread <id>
+./library --user heiki reread 42
+```
+Log every time Heiki asks for another pass before the book is even put down. This is the strongest positive signal in the recommender.
+
+#### `false-start` — opened but not finished
+```bash
+./library false-start <id>
+./library --user heiki false-start 42
+```
+Log when a book gets pushed away partway through. Soft negative — a few false starts will nudge it down in future recommendations without burying it.
+
+#### `rate` / `rate-book` — star rating (optional but useful)
 ```bash
 ./library rate
 ./library --user madeleine rate
 ```
-Prompts you to rate each checked-out book 1–5 based on engagement. Press `s` to skip.
+Prompts you to rate each checked-out unrated book 1–5. Press `s` to skip. The star rating is your subjective take — re-read demands and reads tell you what Heiki actually wanted.
 
 | Stars | Meaning |
 |-------|---------|
@@ -175,11 +247,24 @@ Prompts you to rate each checked-out book 1–5 based on engagement. Press `s` t
 | 4 | Asked for it again |
 | 5 | Totally engaged, must re-read |
 
-### Rate a book directly (no checkout step)
+Rate directly if you know the ID and don't want the interactive prompt:
 ```bash
 ./library rate-book              # interactive search → rate loop
 ./library rate-book <id> <score> # one-liner
 ```
+
+#### How the signals combine
+
+The recommender builds a preference score per book, normalized across the catalog:
+
+| Signal | Weight |
+|--------|--------|
+| Star rating | 30% |
+| Re-read demands | 40% |
+| Times read | 20% |
+| False starts | −10% |
+
+Any book with a preference score above zero seeds the taste profile. All four signals improve recommendations — even a single re-read demand on an unrated book is enough to register.
 
 ### Save and restore ratings
 
@@ -195,7 +280,7 @@ Ratings are saved to a per-user JSON file. Commit these files to git so your his
 ./library --user madeleine import-ratings   # reads ratings_madeleine.json
 ```
 
-Books are matched by title + author, so import works after a full re-scrape even when numeric IDs have changed. Any books not found in the current catalog are reported as skipped — re-run the scraper and import again.
+Books are matched by BiblioCommons ID first, then by title + author as a fallback. Import works after a full re-scrape even when numeric IDs have changed. Any books not found in the current catalog are reported as skipped — re-run the scraper (or use `add-book`) and import again.
 
 **New machine setup:**
 ```bash
@@ -236,11 +321,13 @@ python catalog_scraper.py
 
 ## Tips
 
-- **`--user` goes before the subcommand**, not after: `./library --user heiki rate-book 42 5` ✓ — putting it after stores the rating under the wrong user.
+- **Run `sync-checkouts` before every trip.** Without it, `recommend` doesn't know what's on your shelf and will suggest books you already have.
+- **`--user` goes before the subcommand**, not after: `./library --user heiki rate-book 42 5` ✓ — putting it after stores the data under the wrong user.
 - Re-run `catalog_scraper.py` monthly to pick up new books and updated copy counts. It skips anything unchanged so it's safe to run anytime.
-- The recommendation engine improves significantly after 5+ rated books.
-- Use `./library my-account` to see your pile with IDs and existing ratings, then rate in one pass with `./library --user <name> rate-book <id> <score>`. If a book shows `?` for id but you've rated it before, it's a metadata mismatch — the title+author fallback should catch it automatically; if not, re-run the scraper.
-- Ratings are weighted by score — a 5-star book pulls the taste profile harder than a 4-star one.
-- Use `./library search` to find a book's ID, then `./library availability <id>` to check the shelf before placing a hold.
+- The recommendation engine improves significantly after 5+ engagement events — a mix of reads, reread demands, and ratings all count.
+- Re-read demands carry the most weight (40%). If Heiki smashes the "again" button on a book but you never formally rate it, the recommender still picks it up.
+- Use `./library my-account` to see your pile with IDs and existing ratings, then log engagement in one pass. If a book shows `?` for id, use `add-book` to find and add it.
+- Use `./library search` to find a book's ID — it searches title, subtitle, author, series name, description, and subject. Then use `./library availability <id>` to check the shelf before placing a hold.
 - You can rate books in 0.5 increments (e.g., `3.5`).
 - Export and commit ratings after every library trip so they're never lost.
+- Series volumes are stored separately — searching "Adam Raccoon" shows each volume with its subtitle (e.g., "The Adventures of Adam Raccoon: Lost Woods").

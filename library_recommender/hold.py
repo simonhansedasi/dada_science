@@ -232,41 +232,71 @@ def get_holds(session, account_id):
 
     result = []
     for hid in hold_ids:
-        hold = holds_map.get(hid, {})
-        bib  = bibs_map.get(hold.get("metadataId", ""), {})
-        info = bib.get("briefInfo", {})
+        hold   = holds_map.get(hid, {})
+        bib_id = hold.get("metadataId", "")
+        bib    = bibs_map.get(bib_id, {})
+        book   = _bib_to_book(bib_id, bib)
         result.append({
-            "title":          info.get("title", "Unknown"),
-            "author":         (info.get("authors") or [""])[0],
-            "status":         hold.get("status", ""),
-            "position":       hold.get("holdsPosition"),
-            "pickup_by":      hold.get("pickupByDate"),
-            "pickup_branch":  (hold.get("pickupLocation") or {}).get("name", ""),
-            "expiry":         hold.get("expiryDate"),
-            "metadata_id":    hold.get("metadataId", ""),
+            **book,
+            "status":        hold.get("status", ""),
+            "position":      hold.get("holdsPosition"),
+            "pickup_by":     hold.get("pickupByDate"),
+            "pickup_branch": (hold.get("pickupLocation") or {}).get("name", ""),
+            "expiry":        hold.get("expiryDate"),
         })
     return result
 
 
+def _bib_to_book(bib_id, bib):
+    """Extract a full upsert-ready book dict from a BiblioCommons bib entity."""
+    info  = bib.get("briefInfo",   {})
+    avail = bib.get("availability", {})
+    authors     = info.get("authors") or []
+    isbns       = info.get("isbns")   or []
+    subjects    = (info.get("subjectHeadings") or []) + (info.get("compositeSubjectHeadings") or [])
+    series_list = info.get("series") or []
+    series_name = series_list[0].get("name", "") if series_list else ""
+    copies = avail.get("totalCopies")
+    try:
+        checkout_count = int(copies) if copies is not None else 0
+        if checkout_count >= 999999:
+            checkout_count = 0
+    except (TypeError, ValueError):
+        checkout_count = 0
+    def s(v): return (v or "").strip()
+    return {
+        "metadata_id":            bib_id,
+        "title":                  s(info.get("title")) or "Unknown",
+        "subtitle":               s(info.get("subtitle")),
+        "author":                 s(authors[0]) if authors else "",
+        "series_name":            s(series_name),
+        "description":            s(info.get("description")),
+        "isbn":                   s(isbns[0]) if isbns else "",
+        "genre":                  "; ".join(info.get("genreForm") or []),
+        "subject":                "; ".join(dict.fromkeys(subjects)),
+        "age_range":              "; ".join(info.get("audiences") or []),
+        "library_checkout_count": checkout_count,
+    }
+
+
 def get_checkouts(session, account_id):
-    """Return list of currently checked-out book dicts."""
+    """Return list of currently checked-out book dicts, each including full bib data."""
     data = _gateway_get(session, f"checkouts?accountId={account_id}&limit=100")
-    checkout_ids = data.get("borrowing", {}).get("checkouts", {}).get("items", [])
+    checkout_ids  = data.get("borrowing", {}).get("checkouts", {}).get("items", [])
     checkouts_map = data.get("entities", {}).get("checkouts", {})
     bibs_map      = data.get("entities", {}).get("bibs", {})
 
     result = []
     for cid in checkout_ids:
         checkout = checkouts_map.get(cid, {})
-        bib      = bibs_map.get(checkout.get("metadataId", ""), {})
-        info     = bib.get("briefInfo", {})
+        bib_id   = checkout.get("metadataId", "")
+        bib      = bibs_map.get(bib_id, {})
+        book     = _bib_to_book(bib_id, bib)
         result.append({
-            "title":       info.get("title", "Unknown"),
-            "author":      (info.get("authors") or [""])[0],
-            "due_date":    checkout.get("dueDate", ""),
-            "overdue":     checkout.get("overdue", False),
-            "renewable":   checkout.get("canRenew", False),
-            "metadata_id": checkout.get("metadataId", ""),
+            **book,
+            "due_date":  checkout.get("dueDate", ""),
+            "overdue":   checkout.get("overdue", False),
+            "renewable": checkout.get("canRenew", False),
         })
     return result
 

@@ -1,0 +1,18 @@
+{
+  "gcal_calendar_id": "primary",
+  "gcal_pull_calendar_ids": [
+    "simonhansedasi@gmail.com",
+    "woses21@gmail.com",
+    "vitruviansandwich@gmail.com"
+  ],
+  "timezone": "Pacific/Honolulu",
+  "themes": {
+    "monday": "Mission Monday",
+    "tuesday": "Library Tuesday",
+    "wednesday": "Crafting Wednesday",
+    "thursday": "Café Thursday",
+    "friday": "Adventure Friday",
+    "saturday": "Relief & Planning",
+    "sunday": "Relief & Planning"
+  }
+}

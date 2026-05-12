@@ -1,0 +1,298 @@
+{
+  "trip": {
+    "name": "Waikoloa Holiday 2026",
+    "accommodation": "69-9250 Ainamalu St, Waikoloa Village, HI 96738",
+    "arrival": "2026-03-27",
+    "departure": "2026-04-05"
+  },
+  "legend": {
+    "🧒": "Whole family (toddler included)",
+    "👫": "Adults only",
+    "🌋": "Geology / science",
+    "🏛️": "Cultural heritage",
+    "😴": "Nap / rest",
+    "⚠️": "Needs booking"
+  },
+  "days": [
+    {
+      "date": "2026-03-27",
+      "label": "Fri Mar 27",
+      "theme": "Arrival Day",
+      "activities": [
+        {
+          "time": "8:30–10:30am",
+          "tags": ["🧒"],
+          "title": "Hawai'i Keiki Museum",
+          "desc": "Queens' Marketplace. $10/kid $15/adult, open 9am. Hands-on toddler play, free re-entry within 7 days.",
+          "booking": null
+        },
+        {
+          "time": "11:00am",
+          "tags": ["😴"],
+          "title": "Nap at home",
+          "desc": "Daily hard constraint for toddler.",
+          "booking": null
+        },
+        {
+          "time": "Afternoon",
+          "tags": ["🧒", "🌋"],
+          "title": "Waikoloa Anchialine Ponds (WAPPA)",
+          "desc": "Brackish lava pools fed by underground seawater/freshwater. Tiny red shrimp ('ōpae'ula) visible. Short flat walk.",
+          "booking": null
+        },
+        {
+          "time": "Late afternoon",
+          "tags": ["🧒", "🏛️"],
+          "title": "King's Trail (Ala Kahakai section)",
+          "desc": "Ancient Hawaiian coastal trail from A-Bay northward. Flat, toddler-friendly. Ancient fishponds en route.",
+          "booking": null
+        }
+      ]
+    },
+    {
+      "date": "2026-03-28",
+      "label": "Sat Mar 28",
+      "theme": "Easy Day (rest before race)",
+      "activities": [
+        {
+          "time": "9:30am",
+          "tags": ["🧒", "🏛️"],
+          "title": "Waikoloa Petroglyph Reserve",
+          "desc": "Free guided tour from Kings' Shops. Thousands of basalt carvings: humans, birds, canoes, astronomical symbols. Thu–Sun 9:30am.",
+          "booking": "free_show_up"
+        },
+        {
+          "time": "Afternoon",
+          "tags": ["🧒"],
+          "title": "Pool / home base",
+          "desc": "Early dinner, early bed. Rest before Lavaman race day.",
+          "booking": null
+        }
+      ]
+    },
+    {
+      "date": "2026-03-29",
+      "label": "Sun Mar 29",
+      "theme": "Palm Sunday + Lavaman Triathlon 🏊🚴🏃",
+      "activities": [
+        {
+          "time": "Morning",
+          "tags": ["🧒"],
+          "title": "Cheer squad at A-Bay",
+          "desc": "Anaeho'omalu Bay — Lavaman finish line. Live music, beach BBQ. Wife + FILs racing.",
+          "booking": null
+        },
+        {
+          "time": "Afternoon",
+          "tags": ["🧒", "🌋", "🏛️"],
+          "title": "Stick around A-Bay",
+          "desc": "Anchialine pond walk, King's Trail, palm fronds, turtles.",
+          "booking": null
+        }
+      ]
+    },
+    {
+      "date": "2026-03-30",
+      "label": "Mon Mar 30",
+      "theme": "Movement Monday 🌋🏛️",
+      "activities": [
+        {
+          "time": "Morning",
+          "tags": ["🧒", "🏛️"],
+          "title": "Pu'ukohola Heiau NHS, Kawaihae",
+          "desc": "FREE. One of the largest restored heiau in Hawai'i, built 1790–91 by Kamehameha I. Dry-stack lava masonry, no mortar. Stroller-friendly.",
+          "booking": null
+        },
+        {
+          "time": "While there",
+          "tags": ["🧒"],
+          "title": "Spencer Beach",
+          "desc": "Calm, shaded, toddler-safe. Right next door to Heiau.",
+          "booking": null
+        },
+        {
+          "time": "Evening",
+          "tags": ["👫", "⚠️"],
+          "title": "Manta Ray Night Snorkel",
+          "desc": "ALREADY BOOKED. Confirm time/pickup separately.",
+          "booking": "booked"
+        }
+      ]
+    },
+    {
+      "date": "2026-04-01",
+      "label": "Tue Apr 1",
+      "theme": "Library Tuesday 📚",
+      "activities": [
+        {
+          "time": "Morning",
+          "tags": ["🧒"],
+          "title": "Home reading",
+          "desc": "Books brought from home.",
+          "booking": null
+        },
+        {
+          "time": "Late morning",
+          "tags": ["🧒", "🌋"],
+          "title": "Waikoloa Dry Forest walk",
+          "desc": "Lava field ecosystem succession. ʻAʻā vs pāhoehoe textures, pioneer plant species. Carrier recommended for toddler.",
+          "booking": null
+        },
+        {
+          "time": "Afternoon",
+          "tags": ["👫", "🏛️"],
+          "title": "Waimea town",
+          "desc": "Grandma on toddler duty. 30 min north, 2,700ft elevation. Anna Ranch Heritage Center or farmers market. Drive via Kohala Mountain Road.",
+          "booking": null
+        }
+      ]
+    },
+    {
+      "date": "2026-04-02",
+      "label": "Wed Apr 2",
+      "theme": "Crafting Wednesday 🎨",
+      "activities": [
+        {
+          "time": "Morning",
+          "tags": ["🧒", "🌋"],
+          "title": "Lava rock sorting craft",
+          "desc": "Collect ʻaʻā vs pāhoehoe samples from resort grounds. Talk viscosity, eruption style, flow rate.",
+          "booking": null
+        },
+        {
+          "time": "Afternoon",
+          "tags": ["🧒", "🏛️"],
+          "title": "Petroglyph-inspired art",
+          "desc": "Paper and crayons, make your own 'carvings.' Ancient Hawaiian mark-making meets toddler scribbles.",
+          "booking": null
+        },
+        {
+          "time": "Evening",
+          "tags": ["👫", "⚠️"],
+          "title": "KPC Dinner — Kamuela Provision Company",
+          "desc": "Hilton Waikoloa Village. Romantic patio overlooking Waiulua Bay. Upscale surf 'n' turf, locally sourced. Grandma on toddler duty.",
+          "booking": "not_booked"
+        }
+      ]
+    },
+    {
+      "date": "2026-04-03",
+      "label": "Thu Apr 3",
+      "theme": "Café/Plantation Thursday ☕",
+      "activities": [
+        {
+          "time": "Morning",
+          "tags": ["👫", "🌋"],
+          "title": "Kona Coffee Farm",
+          "desc": "Kona Coffee Living History Farm or Mountain Thunder. ~45 min south. Volcanic soil chemistry, 1920s Japanese immigrant farming history.",
+          "booking": "not_booked"
+        },
+        {
+          "time": "Morning (toddler)",
+          "tags": ["🧒"],
+          "title": "Grandma → Keiki Museum (re-entry)",
+          "desc": "Free re-entry still valid from arrival day visit.",
+          "booking": null
+        },
+        {
+          "time": "Afternoon",
+          "tags": ["🧒"],
+          "title": "Hapuna Beach",
+          "desc": "On the drive back. One of the best white-sand beaches on the island, calm water, excellent for toddlers.",
+          "booking": null
+        }
+      ]
+    },
+    {
+      "date": "2026-04-04",
+      "label": "Fri Apr 4",
+      "theme": "Adventure Friday 🌋⭐ (BIG DAY)",
+      "activities": [
+        {
+          "time": "Morning",
+          "tags": ["🧒", "🌋", "🏛️"],
+          "title": "Puako Petroglyph Field",
+          "desc": "Mauna Lani / Holoholokai Beach Park. Malama Trail: 1.4 miles through keawe forest, past a lava cave, to open lava field. Bring toddler carrier.",
+          "booking": null
+        },
+        {
+          "time": "Midday",
+          "tags": ["😴"],
+          "title": "Nap at home",
+          "desc": "Rest before big evening.",
+          "booking": null
+        },
+        {
+          "time": "~2:00pm",
+          "tags": ["👫", "⚠️", "🌋"],
+          "title": "Mauna Kea Summit Sunset + Stargazing Tour",
+          "desc": "BOOK IMMEDIATELY. Pickup Queens' Marketplace ~2pm, return ~9:30–10pm. 4WD van, parkas, hot meal, 11\" telescope. 13,796ft summit — world's tallest volcano base-to-peak. Grandma on full toddler/bedtime duty.",
+          "booking": "not_booked"
+        }
+      ]
+    },
+    {
+      "date": "2026-04-05",
+      "label": "Sat Apr 4 / Sun Apr 5",
+      "theme": "Relief, Pack, Depart ✈️",
+      "activities": [
+        {
+          "time": "Morning",
+          "tags": ["🧒"],
+          "title": "Slow morning",
+          "desc": "Shave ice on Alii Drive if time allows.",
+          "booking": null
+        },
+        {
+          "time": "Before departure",
+          "tags": ["🧒"],
+          "title": "Pack + souvenir lava rocks",
+          "desc": "Resort grounds only — NOT from parks.",
+          "booking": null
+        }
+      ]
+    }
+  ],
+  "bookings": [
+    {
+      "id": "manta_ray",
+      "item": "Manta Ray Night Snorkel",
+      "date": "2026-03-30",
+      "day": "Mon Mar 30",
+      "status": "booked",
+      "action": "Confirm time/pickup details"
+    },
+    {
+      "id": "mauna_kea",
+      "item": "Mauna Kea Summit Tour",
+      "date": "2026-04-04",
+      "day": "Fri Apr 4",
+      "status": "not_booked",
+      "action": "Go to maunakea.com NOW — fills fast"
+    },
+    {
+      "id": "kpc_dinner",
+      "item": "KPC Dinner — Kamuela Provision Company",
+      "date": "2026-04-02",
+      "day": "Wed Apr 2",
+      "status": "not_booked",
+      "action": "Call Hilton Waikoloa or book via OpenTable"
+    },
+    {
+      "id": "petroglyph_tour",
+      "item": "Waikoloa Petroglyph Tour",
+      "date": "2026-03-28",
+      "day": "Sat Mar 28",
+      "status": "free_show_up",
+      "action": "Show up Kings' Shops 9:30am — no booking needed"
+    },
+    {
+      "id": "kona_coffee",
+      "item": "Kona Coffee Farm Tour",
+      "date": "2026-04-03",
+      "day": "Thu Apr 3",
+      "status": "not_booked",
+      "action": "Check availability at kona-coffee-living-history-farm.com or mountainthunder.com"
+    }
+  ]
+}
