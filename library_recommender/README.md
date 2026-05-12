@@ -1,6 +1,6 @@
 # Library Recommender
 
-A command-line tool that helps you pick the best books to check out from the library for your toddler. It scrapes the Sno-Isle library catalog directly into a local database, learns each user's taste from engagement ratings after each visit, and can place holds on recommended books from the command line.
+A tool for finding and tracking children's library books. It scrapes the Sno-Isle catalog into a local database, learns each user's taste from engagement signals after each visit, and can place holds directly from the interface. The primary interface is a local web UI served from the Raspberry Pi; a CLI is also available for scripting and bulk operations.
 
 Built for a 2-year-old whose parents track engagement using four signals: a 1–5 star rating, completed reading sessions, re-read demands ("again!"), and false starts. Supports multiple users with separate profiles.
 
@@ -8,11 +8,11 @@ Built for a 2-year-old whose parents track engagement using four signals: a 1–
 
 ## Plain Language Summary
 
-Run the scraper to pull the Sno-Isle catalog into a local database (`library.db`). When you get recommendations, it shows you 10 books split into three groups: the best overall matches, a couple of "wild card" picks that are similar to what your child loved but that most people overlook, and three books that almost nobody checks out (pure discovery). When you find something you want, place a hold directly from the command line.
+The catalog is scraped nightly into `library.db` on the Pi. Open the web UI on your phone or any device on the home network, tap Refresh to see what you currently have checked out, and log engagement — a slider for the rating, +/− buttons for reads, rereads, and false starts. Tap Recommend to get 10 suggestions with live shelf availability at your home branch. Place holds directly from that screen.
 
-After reading, tally your engagement signals: log completed sessions with `read`, re-read demands with `reread`, and abandoned attempts with `false-start`. Star ratings are a separate, optional layer. All four signals combine into a preference score that drives future recommendations.
+All four engagement signals combine into a preference score that drives recommendations. Re-read demands carry the most weight — a child grabbing the book back before it's even put down is the strongest signal the system tracks.
 
-Each parent has their own user profile and engagement history. Recommendations are fully independent — different users can have different taste profiles against the same catalog.
+Each parent has their own user profile and engagement history. Recommendations are fully independent across users against the same shared catalog.
 
 ---
 
@@ -20,21 +20,61 @@ Each parent has their own user profile and engagement history. Recommendations a
 
 ```
 library_recommender/
+├── app.py                  Flask web UI — served on Pi at port 5003
+├── templates/index.html    Single-page HTML — Checked Out, Recommend, Holds tabs
 ├── cli.py                  CLI entry point — all commands live here
 ├── db.py                   Database layer — reads and writes to library.db
 ├── recommender.py          Recommendation engine — scoring and ranking logic
-├── catalog_scraper.py      Scraper — pulls Sno-Isle catalog directly into library.db
+├── catalog_scraper.py      Scraper — pulls Sno-Isle catalog into library.db (runs nightly via cron)
 ├── hold.py                 Hold placement — login, account resolution, hold submission
 ├── explore_catalog.py      Catalog explorer — shows available filter fields and counts
-├── Untitled.ipynb          Scraper notebook — exploration / raw API inspection
 ├── library                 Shell wrapper so you can run ./library <command>
-├── library.db              SQLite database (created on first run, not committed — too large)
+├── library.db              SQLite database — source of truth lives on Pi (not committed)
+├── venv/                   Python venv on Pi (not committed, not rsynced)
+├── logs/scraper.log        Nightly scraper output (on Pi only)
 ├── ratings_heiki.json      Heiki's exported ratings — commit to git
 ├── ratings_madeleine.json  Madeleine's exported ratings — commit to git
 ├── requirements.txt        Python dependencies
 ├── INSTRUCTIONS.md         Quick reference for daily use
 └── README.md               This file
 ```
+
+---
+
+## Deploy Model
+
+Code is written locally and rsynced to the Pi. The Pi runs everything — web UI, scraper, CLI. Git is managed from the local machine.
+
+**`library.db` on the Pi is the source of truth.** Do not overwrite it from a local copy.
+
+### Sync to Pi
+
+```bash
+rsync -av --exclude='venv' --exclude='library.db' --exclude='.env' \
+          --exclude='__pycache__' --exclude='logs' \
+  ~/coding/dada_science/library_recommender/ \
+  simonhans@raspberrypi:~/coding/dada_science/library_recommender/
+```
+
+### Start the web UI on Pi
+
+```bash
+ssh simonhans@raspberrypi
+cd ~/coding/dada_science/library_recommender
+nohup venv/bin/python app.py &
+```
+
+Access at `http://raspberrypi:5003` (or the Pi's LAN IP, e.g. `http://192.168.88.12:5003`).
+
+### Nightly catalog update
+
+A cron job runs the scraper every night at midnight:
+
+```
+0 0 * * * cd ~/coding/dada_science/library_recommender && venv/bin/python catalog_scraper.py >> logs/scraper.log 2>&1
+```
+
+Check the last run: `tail ~/coding/dada_science/library_recommender/logs/scraper.log`
 
 ---
 

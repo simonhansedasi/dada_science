@@ -1,10 +1,17 @@
 # Library Recommender — Quick Reference
 
-## Setup (first time only)
+## Setup (first time on Pi)
 
 ```bash
 cd ~/coding/dada_science/library_recommender
-pip install -r requirements.txt
+python3 -m venv venv
+venv/bin/pip install -r requirements.txt
+```
+
+Copy `.env` and `library.db` from local machine if starting fresh:
+```bash
+# run from local machine
+scp .env library.db simonhans@raspberrypi:~/coding/dada_science/library_recommender/
 ```
 
 ---
@@ -45,14 +52,35 @@ All commands support `--user`. The default is whatever `LIBRARY_USER` is set to 
 
 ---
 
+## Web UI (primary interface)
+
+Start on the Pi:
+```bash
+cd ~/coding/dada_science/library_recommender
+nohup venv/bin/python app.py &
+```
+
+Open on any device on the home network: `http://raspberrypi:5003`
+
+- **Checked Out** — tap Refresh; rate with slider (0.25 steps); +/− buttons for reads, rereads, false starts
+- **Recommend** — 10 suggestions with live shelf availability and call number; Hold button places hold directly
+- **Holds** — current holds with status and pickup info
+
+---
+
 ## Getting a catalog (first time only)
 
 ```bash
 # Full run — ~20-40k juvenile books, subject-targeted (~5-10 min)
-python catalog_scraper.py
+venv/bin/python catalog_scraper.py
 
 # Quick test first (~500 books)
-python catalog_scraper.py --max-pages 2
+venv/bin/python catalog_scraper.py --max-pages 2
+```
+
+The scraper runs automatically every night at midnight via cron. Check the last run:
+```bash
+tail logs/scraper.log
 ```
 
 The scraper queries 12 children's subject categories (`picture books`, `juvenile fiction`, `board books`, `fairy tales`, etc.) and deduplicates by BiblioCommons bib ID. Overlapping subjects are free — a book appearing in multiple subjects is only stored once.
@@ -77,9 +105,12 @@ Shows matching results with checkout counts and any already-in-catalog flags. En
 
 ## Cold start — seed your first ratings
 
-Before the recommender can personalize suggestions it needs a few ratings. Use `export-account-csv` if you have books currently checked out, or `rate-book` to rate books you've already read without going through the checkout flow.
+Before the recommender can personalize suggestions it needs a few ratings. The easiest way is the web UI — open the Checked Out tab and use the sliders and counters. For bulk entry from a spreadsheet, use the CSV workflow.
 
-**CSV workflow** (fastest for a batch):
+**Web UI** (easiest):
+Open `http://raspberrypi:5003`, tap Refresh on the Checked Out tab, adjust sliders and counters directly.
+
+**CSV workflow** (bulk entry from a spreadsheet):
 ```bash
 ./library export-account-csv          # export current checkouts
 # fill in the CSV, then:
