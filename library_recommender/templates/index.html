@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Library — {{ user }}</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f5f5f0;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #2c5f8a;
+    color: #fff;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header h1 { font-size: 1.1rem; font-weight: 600; }
+  header .user { font-size: 0.8rem; opacity: 0.75; }
+
+  nav {
+    display: flex;
+    background: #fff;
+    border-bottom: 2px solid #e0e0e0;
+    position: sticky;
+    top: 48px;
+    z-index: 9;
+  }
+  nav button {
+    flex: 1;
+    padding: 12px 8px;
+    border: none;
+    background: none;
+    font-size: 0.9rem;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+  nav button.active {
+    color: #2c5f8a;
+    border-bottom-color: #2c5f8a;
+  }
+
+  .tab { display: none; padding: 16px; }
+  .tab.active { display: block; }
+
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    min-height: 44px;
+    transition: opacity 0.15s;
+  }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn-primary { background: #2c5f8a; color: #fff; }
+  .btn-success { background: #2e7d4f; color: #fff; }
+  .btn-danger  { background: #b94040; color: #fff; }
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    min-height: 36px;
+    border-radius: 6px;
+  }
+
+  /* Book cards */
+  .book-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .book-title {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .book-subtitle {
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 2px;
+  }
+  .book-author {
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: 2px;
+    margin-bottom: 12px;
+  }
+  .book-due {
+    font-size: 0.78rem;
+    color: #999;
+    margin-bottom: 10px;
+  }
+  .book-due.overdue { color: #c0392b; font-weight: 600; }
+
+  /* Rating slider */
+  .rating-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .rating-row label {
+    font-size: 0.8rem;
+    color: #555;
+    white-space: nowrap;
+    min-width: 44px;
+  }
+  .rating-row input[type=range] {
+    flex: 1;
+    accent-color: #f0a500;
+    height: 4px;
+    cursor: pointer;
+  }
+  .rating-val {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #f0a500;
+    min-width: 36px;
+    text-align: right;
+  }
+
+  /* Counter rows */
+  .counters { display: flex; flex-direction: column; gap: 8px; }
+  .counter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .counter-row label {
+    font-size: 0.8rem;
+    color: #555;
+    min-width: 80px;
+  }
+  .counter-btns {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .counter-btns button {
+    width: 44px;
+    height: 36px;
+    border: none;
+    background: #f7f7f7;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .counter-btns button:active { background: #e0e0e0; }
+  .counter-val {
+    min-width: 36px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0 4px;
+    background: #fff;
+  }
+
+  /* Availability badge */
+  .avail-badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-top: 10px;
+    font-weight: 500;
+  }
+  .avail-available { background: #d4edda; color: #1a5c2e; }
+  .avail-out       { background: #f0f0f0; color: #666; }
+  .avail-none      { background: #f0f0f0; color: #999; }
+  .avail-unknown   { background: #f0f0f0; color: #999; }
+
+  .shelf-info {
+    font-size: 0.78rem;
+    color: #555;
+    margin-top: 4px;
+  }
+
+  /* Holds table */
+  .holds-list { display: flex; flex-direction: column; gap: 12px; }
+  .hold-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+  .hold-status {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .status-ready    { background: #d4edda; color: #1a5c2e; }
+  .status-waiting  { background: #fff3cd; color: #856404; }
+  .status-transit  { background: #cce5ff; color: #004085; }
+
+  /* Rec categories */
+  .rec-category {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 18px 0 8px;
+    color: #888;
+  }
+  .rec-category:first-child { margin-top: 0; }
+
+  .spinner {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-size: 0.9rem;
+  }
+
+  .error-msg {
+    background: #fdecea;
+    color: #b00;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    margin-bottom: 12px;
+  }
+
+  .empty-msg {
+    text-align: center;
+    padding: 40px 20px;
+    color: #aaa;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📚 Library</h1>
+  <span class="user">{{ user }}</span>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('checked-out')">Checked Out</button>
+  <button onclick="showTab('recommendations')">Recommend</button>
+  <button onclick="showTab('holds')">Holds</button>
+</nav>
+
+<!-- ── Checked Out ──────────────────────────────────────────────────── -->
+<div id="checked-out" class="tab active">
+  <div class="action-bar">
+    <button class="btn btn-primary" onclick="loadAccount()">Refresh</button>
+  </div>
+  <div id="checkout-error"></div>
+  <div id="checkout-list"><div class="empty-msg">Tap Refresh to load your checked-out books.</div></div>
+</div>
+
+<!-- ── Recommendations ─────────────────────────────────────────────── -->
+<div id="recommendations" class="tab">
+  <div class="action-bar">
+    <button class="btn btn-primary" onclick="loadRecommendations()">Get Recommendations</button>
+  </div>
+  <div id="rec-error"></div>
+  <div id="rec-list"><div class="empty-msg">Tap Get Recommendations to load suggestions.</div></div>
+</div>
+
+<!-- ── Holds ──────────────────────────────────────────────────────── -->
+<div id="holds" class="tab">
+  <div id="holds-error"></div>
+  <div id="holds-list"><div class="empty-msg">Tap Refresh on the Checked Out tab to load holds.</div></div>
+</div>
+
+<script>
+// ── Tab switching ──────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function setError(id, msg) {
+  const el = document.getElementById(id);
+  el.innerHTML = msg ? `<div class="error-msg">${msg}</div>` : '';
+}
+
+function starStr(rating) {
+  if (!rating) return '';
+  const full = Math.round(rating);
+  return '★'.repeat(full) + '☆'.repeat(5 - full);
+}
+
+function availClass(status) {
+  return 'avail-' + (status || 'unknown');
+}
+
+// ── Rating slider debounce ─────────────────────────────────────────────────
+const _rateTimers = {};
+function onRatingChange(bookId, val) {
+  document.getElementById(`rval-${bookId}`).textContent = parseFloat(val).toFixed(2) + ' ★';
+  clearTimeout(_rateTimers[bookId]);
+  _rateTimers[bookId] = setTimeout(() => saveRating(bookId, val), 500);
+}
+
+async function saveRating(bookId, val) {
+  await fetch('/api/rate', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({book_id: bookId, rating: parseFloat(val)}),
+  });
+}
+
+// ── Engagement counters ────────────────────────────────────────────────────
+async function adjust(bookId, field, delta) {
+  const btn = event.currentTarget;
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/engagement', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({book_id: bookId, field, delta}),
+    });
+    const data = await r.json();
+    document.getElementById(`${field}-${bookId}`).textContent = data.value;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Account / Checked Out ──────────────────────────────────────────────────
+let _holdsData = [];
+
+async function loadAccount() {
+  const listEl = document.getElementById('checkout-list');
+  listEl.innerHTML = '<div class="spinner">Loading…</div>';
+  setError('checkout-error', '');
+
+  let data;
+  try {
+    const r = await fetch('/api/account');
+    data = await r.json();
+  } catch (e) {
+    setError('checkout-error', 'Network error: ' + e.message);
+    listEl.innerHTML = '';
+    return;
+  }
+  if (data.error) {
+    setError('checkout-error', data.error);
+    listEl.innerHTML = '';
+    return;
+  }
+
+  _holdsData = data.holds || [];
+  renderHolds();
+
+  const books = data.checkouts || [];
+  if (!books.length) {
+    listEl.innerHTML = '<div class="empty-msg">No books currently checked out.</div>';
+    return;
+  }
+
+  listEl.innerHTML = books.map(b => {
+    const title    = b.subtitle ? `${b.title}: ${b.subtitle}` : b.title;
+    const dueClass = b.overdue ? ' overdue' : '';
+    const dueStr   = b.due_date ? `Due ${b.due_date}${b.overdue ? ' — OVERDUE' : ''}` : '';
+    const ratingVal = b.avg_rating ? b.avg_rating.toFixed(2) : '—';
+    const sliderVal = b.avg_rating || 3;
+
+    if (!b.id) {
+      return `<div class="book-card">
+        <div class="book-title">${esc(title)}</div>
+        <div class="book-author">${esc(b.author || '')}</div>
+        <div class="book-due${dueClass}">${dueStr}</div>
+        <div style="font-size:0.78rem;color:#aaa;">Not yet in local catalog</div>
+      </div>`;
+    }
+
+    return `<div class="book-card">
+      <div class="book-title">${esc(title)}</div>
+      <div class="book-author">${esc(b.author || '')}</div>
+      ${dueStr ? `<div class="book-due${dueClass}">${dueStr}</div>` : ''}
+
+      <div class="rating-row">
+        <label>Rating</label>
+        <input type="range" min="1" max="5" step="0.25"
+               value="${sliderVal}"
+               oninput="onRatingChange(${b.id}, this.value)">
+        <span class="rating-val" id="rval-${b.id}">${b.avg_rating ? b.avg_rating.toFixed(2) + ' ★' : '—'}</span>
+      </div>
+
+      <div class="counters">
+        <div class="counter-row">
+          <label>Reads</label>
+          <div class="counter-btns">
+            <button onclick="adjust(${b.id}, 'times_read', -1)">−</button>
+            <span class="counter-val" id="times_read-${b.id}">${b.times_read}</span>
+            <button onclick="adjust(${b.id}, 'times_read', 1)">+</button>
+          </div>
+        </div>
+        <div class="counter-row">
+          <label>Rereads</label>
+          <div class="counter-btns">
+            <button onclick="adjust(${b.id}, 'reread_demands', -1)">−</button>
+            <span class="counter-val" id="reread_demands-${b.id}">${b.reread_demands}</span>
+            <button onclick="adjust(${b.id}, 'reread_demands', 1)">+</button>
+          </div>
+        </div>
+        <div class="counter-row">
+          <label>False starts</label>
+          <div class="counter-btns">
+            <button onclick="adjust(${b.id}, 'false_starts', -1)">−</button>
+            <span class="counter-val" id="false_starts-${b.id}">${b.false_starts}</span>
+            <button onclick="adjust(${b.id}, 'false_starts', 1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Recommendations ────────────────────────────────────────────────────────
+async function loadRecommendations() {
+  const listEl = document.getElementById('rec-list');
+  listEl.innerHTML = '<div class="spinner">Thinking…</div>';
+  setError('rec-error', '');
+
+  let data;
+  try {
+    const r = await fetch('/api/recommend');
+    data = await r.json();
+  } catch (e) {
+    setError('rec-error', 'Network error: ' + e.message);
+    listEl.innerHTML = '';
+    return;
+  }
+  if (data.error) {
+    setError('rec-error', data.error);
+    listEl.innerHTML = '';
+    return;
+  }
+
+  const books = data.books || [];
+  if (!books.length) {
+    listEl.innerHTML = '<div class="empty-msg">No recommendations yet — rate some books first.</div>';
+    return;
+  }
+
+  const categoryLabels = {top: 'Top matches', experimental: 'Experimental', gem: 'Hidden gems'};
+  let html = '';
+  let lastCat = null;
+
+  books.forEach(b => {
+    if (b.category !== lastCat) {
+      html += `<div class="rec-category">${categoryLabels[b.category] || b.category}</div>`;
+      lastCat = b.category;
+    }
+    const title = b.subtitle ? `${b.title}: ${b.subtitle}` : b.title;
+    const badgeClass = availClass(b.avail_status);
+    const badgeLabel = b.avail_label || '—';
+    const shelfLine  = (b.call_number || b.collection)
+      ? `<div class="shelf-info">${esc(b.call_number)}${b.call_number && b.collection ? '  ·  ' : ''}${esc(b.collection)}</div>`
+      : '';
+
+    html += `<div class="book-card">
+      <div class="book-title">${esc(title)}</div>
+      ${b.author ? `<div class="book-author">${esc(b.author)}</div>` : ''}
+      ${b.branch_name ? `<span class="avail-badge ${badgeClass}">${esc(b.branch_name)}: ${esc(badgeLabel)}</span>` : ''}
+      ${shelfLine}
+      ${b.metadata_id && b.metadata_id.startsWith('S121')
+        ? `<div style="margin-top:10px"><button class="btn btn-success btn-sm" onclick="placeHold(${b.id}, this)">Place Hold</button></div>`
+        : ''}
+    </div>`;
+  });
+
+  listEl.innerHTML = html;
+}
+
+async function placeHold(bookId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Placing…';
+  try {
+    const r = await fetch('/api/hold', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({book_id: bookId}),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      btn.textContent = 'Hold placed ✓';
+      btn.classList.replace('btn-success', 'btn-primary');
+    } else {
+      btn.textContent = 'Failed';
+      btn.disabled = false;
+      alert(data.error || 'Hold failed');
+    }
+  } catch (e) {
+    btn.textContent = 'Error';
+    btn.disabled = false;
+  }
+}
+
+// ── Holds ──────────────────────────────────────────────────────────────────
+function renderHolds() {
+  const el = document.getElementById('holds-list');
+  if (!_holdsData.length) {
+    el.innerHTML = '<div class="empty-msg">No holds.</div>';
+    return;
+  }
+  el.innerHTML = _holdsData.map(h => {
+    const s = (h.status || '').toUpperCase();
+    const cls = s === 'READY' ? 'status-ready' : s === 'IN_TRANSIT' ? 'status-transit' : 'status-waiting';
+    const pos = h.position ? ` · #${h.position} in queue` : '';
+    const due = h.pickup_by ? ` · Pick up by ${h.pickup_by}` : '';
+    return `<div class="hold-card">
+      <div><span class="hold-status ${cls}">${esc(h.status || 'WAITING')}</span></div>
+      <div class="book-title">${esc(h.title)}</div>
+      ${h.author ? `<div class="book-author">${esc(h.author)}</div>` : ''}
+      <div style="font-size:0.78rem;color:#888;margin-top:6px">${esc(h.pickup_branch || '')}${pos}${due}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── XSS escape ─────────────────────────────────────────────────────────────
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
